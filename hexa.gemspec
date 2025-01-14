@@ -9,6 +9,8 @@ Gem::Specification.new do |s|
   s.homepage    =
     "https://github.com/dmitrysharkov/hexa-ruby"
   s.license       = "MIT"
+
+  s.add_runtime_dependency "zeitwerk"
 end
 
 
