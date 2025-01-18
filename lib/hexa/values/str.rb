@@ -1,6 +1,6 @@
 module Hexa
   module Values
-    class Integer < ::Integer
+    class Str < ::String
       include Scalar
     end
   end

@@ -1,7 +1,7 @@
 module Hexa
   module Values
-    class Object
-      include ObjectMixin
+    class Record
+      include RecordMixin
     end
   end
 end

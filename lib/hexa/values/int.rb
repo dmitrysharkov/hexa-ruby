@@ -1,6 +1,6 @@
 module Hexa
   module Values
-    class Float < ::Float
+    class Int < ::Integer
       include Scalar
     end
   end

@@ -1,6 +1,6 @@
 module Hexa
   module Values
-    class Boolean < TrueClass
+    class Flt < ::Float
       include Scalar
     end
   end

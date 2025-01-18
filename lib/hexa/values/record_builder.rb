@@ -1,6 +1,6 @@
 module Hexa
   module Values
-    class ObjectBuilder
+    class RecordBuilder
       attr_reader :attributes, :attributes_map
 
       def initialize(attributes)

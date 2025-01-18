@@ -1,6 +1,6 @@
 module Hexa
   module Values
-    class Array
+    class List
       class << self
         attr_reader :item_type
 
@@ -9,7 +9,7 @@ module Hexa
         end
 
         def of(type)
-          Class.new(Array) { item type }
+          Class.new(List) { item type }
         end
 
         def |(other)

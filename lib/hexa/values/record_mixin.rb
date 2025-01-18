@@ -2,7 +2,7 @@
 
 module Hexa
   module Values
-    module ObjectMixin
+    module RecordMixin
       # Record class methods
       module ClassMethods
         def attributes
@@ -35,7 +35,7 @@ module Hexa
         end
 
         def builder
-          @builder ||= ObjectBuilder.new(attributes)
+          @builder ||= RecordBuilder.new(attributes)
         end
 
         def construct(source, options = {})
@@ -56,11 +56,11 @@ module Hexa
         # rubocop:disable Metrics/CyclomaticComplexity,Metrics/MethodLength
         def const_missing(name)
           case name
-          when :Str then Values::String
-          when :Bool then Values::Boolean
-          when :Int then Values::Integer
-          when :Flt then Values::Float
-          when :Arr then Values::Array
+          when :Str then Values::Str
+          when :Bool then Values::Bool
+          when :Int then Values::Int
+          when :Flt then Values::Flt
+          when :List then Values::List
           when :Null then Null
           when :Undefined then Values::Undefined
           when :Values, :V, :Val then Values

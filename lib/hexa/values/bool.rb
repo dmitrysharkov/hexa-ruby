@@ -1,6 +1,6 @@
 module Hexa
   module Values
-    class String < ::String
+    class Bool < TrueClass
       include Scalar
     end
   end

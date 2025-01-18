@@ -5,14 +5,14 @@ require 'hexa'
 require 'pry-byebug'
 
 class User
-  include Hexa::Values::ObjectMixin
+  include Hexa::Values::RecordMixin
 
   attr :first_name, Str | Null | Undefined
   attr :last_name, Str | Null | Undefined
-  attr :tags, Values::Array.of(Str) | Undefined
+  attr :tags, List.of(Str) | Undefined
 end
 
-describe Hexa::Values::ObjectMixin do
+describe Hexa::Values::RecordMixin do
   describe 'class' do
     it 'lists all attributes names' do
       assert_equal %i[first_name last_name tags], User.attributes.map(&:name)
