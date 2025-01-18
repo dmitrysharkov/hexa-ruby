@@ -92,6 +92,8 @@ module Hexa
       end
 
       def ==(other)
+        return false unless other.is_a?(self.class)
+
         self.class.attributes.each do |attr|
           return false unless send(attr.private_getter) == other.send(attr.private_getter)
         end

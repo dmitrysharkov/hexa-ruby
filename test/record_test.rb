@@ -70,7 +70,7 @@ describe Hexa::Values::RecordMixin do
     end
   end
 
-  describe 'euality' do
+  describe 'euqality' do
     before do
       @u1 = User.new(first_name: 'John', last_name: 'Doe', tags: %w[aaa bbb ccc])
       @u2 = User.new(first_name: 'John', last_name: 'Doe', tags: %w[aaa bbb ccc])
