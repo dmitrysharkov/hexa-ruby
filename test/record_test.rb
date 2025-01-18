@@ -7,9 +7,9 @@ require 'pry-byebug'
 class User
   include Hexa::Values::RecordMixin
 
-  attr :first_name, Str | Null | Undefined
-  attr :last_name, Str | Null | Undefined
-  attr :tags, List.of(Str) | Undefined
+  attr :first_name, Str | Null | Undefined, desc: 'First Name'
+  attr :last_name, Str | Null | Undefined, desc:  'Last Name'
+  attr :tags, List.of(Str) | Undefined, desc: 'Tags'
 end
 
 describe Hexa::Values::RecordMixin do

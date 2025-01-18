@@ -9,8 +9,8 @@ module Hexa
           @attributes ||= []
         end
 
-        def attr(name, type)
-          attr = Attribute.new(name.to_sym, type)
+        def attr(name, type, desc: nil)
+          attr = Attribute.new(name.to_sym, type, desc)
 
           @builder = nil
           attributes << attr

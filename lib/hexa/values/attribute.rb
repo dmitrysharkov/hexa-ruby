@@ -1,9 +1,10 @@
 module Hexa
   module Values
     class Attribute
-      attr_reader :name, :setter, :private_getter, :type, :defined_predicate_name
+      attr_reader :name, :setter, :private_getter, :type, :defined_predicate_name, :description
 
-      def initialize(name, type)
+      def initialize(name, type, desc)
+        @description = desc
         @name = name.to_sym
         @setter = :"#{name}="
         @type = type
