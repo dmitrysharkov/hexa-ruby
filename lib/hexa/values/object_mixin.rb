@@ -12,6 +12,7 @@ module Hexa
         def attr(name, type)
           attr = Attribute.new(name.to_sym, type)
 
+          @builder = nil
           attributes << attr
 
           attr_accessor attr.name
@@ -42,7 +43,7 @@ module Hexa
 
           instance = allocate
 
-          context = BuilderContext.new(options)
+          context = BuilderContext.init(options)
           builder.call(instance, source, context)
 
           [instance, context.errors]
@@ -59,6 +60,7 @@ module Hexa
           when :Bool then Values::Boolean
           when :Int then Values::Integer
           when :Flt then Values::Float
+          when :Arr then Values::Array
           when :Null then Null
           when :Undefined then Values::Undefined
           when :Values, :V, :Val then Values

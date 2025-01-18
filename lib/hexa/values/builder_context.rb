@@ -1,9 +1,9 @@
 module Hexa
   module Values
     class BuilderContext
-      def self.new(source)
+      def self.init(source)
         case source
-        when Hash then super
+        when Hash then new(source)
         when BuilderContext then source
         else
           raise ArgumentError, "#{Hash} or #{BuilderContext} expected", caller[1..]
@@ -13,6 +13,8 @@ module Hexa
       attr_reader :current_path, :errors, :options
 
       def initialize(options)
+        raise ArgumentError, "#{Hash} expected", caller[1..] unless options.is_a?(Hash)
+
         @options = options
         @current_path = []
         @errors = []
@@ -41,8 +43,9 @@ module Hexa
 
         return unless block_given?
 
-        yield
+        val = yield
         pop
+        val
       end
 
       def pop

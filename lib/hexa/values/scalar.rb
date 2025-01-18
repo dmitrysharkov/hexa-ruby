@@ -15,7 +15,7 @@ module Hexa
         end
 
         def construct(val, options = {})
-          context = BuilderContext.new(options)
+          context = BuilderContext.init(options)
 
           context.error(:missed) if val.is_a?(Undefined)
           context.error(:format) unless val.is_a?(base_class)

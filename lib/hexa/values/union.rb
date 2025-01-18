@@ -22,7 +22,7 @@ module Hexa
       end
 
       def construct(src, options = {})
-        context = BuilderContext.new(options)
+        context = BuilderContext.init(options)
 
         @types.each do |type|
           local_context = BuilderContext.new(context.options.reject { |key| key == :raise_at })
