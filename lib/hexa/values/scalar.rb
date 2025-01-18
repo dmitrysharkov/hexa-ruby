@@ -17,14 +17,41 @@ module Hexa
         def construct(val, options = {})
           context = BuilderContext.init(options)
 
-          context.error(:missed) if val.is_a?(Undefined)
-          context.error(:format) unless val.is_a?(base_class)
+          if val.is_a?(Undefined)
+            context.error(:missed)
+          elsif !val.is_a?(base_class)
+            context.error(:expected_type, base_class)
+          else
+            invariants.each do |name, attributes, fn|
+              context.error(name, *attributes) unless fn.call(val, *attributes)
+            end
+          end
 
           if context.errors?
             [nil, context.errors]
           else
             [val, nil]
           end
+        end
+
+        def invariants
+          @invariants ||= []
+        end
+
+        INVARIANTS = {
+          gt: proc { |val, base| val > base },
+          gteq: proc { |val, base| val >= base },
+          lt: proc { |val, base| val < base },
+          lteq: proc { |val, base| val <= base },
+          format: proc { |val, re| re =~ val }
+        }.freeze
+
+        def validate(name, *args, &block)
+          invariants << [name, args, block ? proc(&block) : INVARIANTS[name]]
+        end
+
+        def inherited(subclass)
+          subclass.base_class = base_class
         end
       end
 

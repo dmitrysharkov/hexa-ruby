@@ -1,5 +1,7 @@
 VALUES 
-* Validators 
+* Validators for primitive types
+* Validators for arrays 
+* Validators for records
 * Arrays 
 * Groups
 * Inheritance 
@@ -8,6 +10,8 @@ VALUES
 * Coercing
 * Parse Primitives To String
 * Equality
+* Custom options 
+* Enum
 
               
 Pipes
@@ -22,8 +26,11 @@ Formats
 * From/TO Excel
 
 
-* Entities 
+* Entities (ids, has_one, has_many)
+* Lazy collections in entities
+* Change Sets
 * SQL Repositories for Entities 
+* SQL Schema Generation For Entities
 
 * Events 
 * SQL Event Store
@@ -31,6 +38,7 @@ Formats
 
 
 * Commands 
+* Command Options (including validators)
 * Projections 
 
 * OpenAPI
