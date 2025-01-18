@@ -69,4 +69,19 @@ describe Hexa::Values::RecordMixin do
       assert_equal hash, @instance.deconstruct_keys(%i[first_name last_name tags])
     end
   end
+
+  describe 'euality' do
+    before do
+      @u1 = User.new(first_name: 'John', last_name: 'Doe', tags: %w[aaa bbb ccc])
+      @u2 = User.new(first_name: 'John', last_name: 'Doe', tags: %w[aaa bbb ccc])
+      @u3 = User.new(first_name: 'Jane', last_name: 'Doe', tags: %w[aaa bbb ccc])
+      @u4 = User.new(first_name: 'Jane', last_name: 'Doe', tags: %w[aaa bbb ddd])
+    end
+
+    it 'checks equality' do
+      assert_equal @u1, @u2
+      refute_equal @u1, @u3
+      refute_equal @u3, @u4
+    end
+  end
 end

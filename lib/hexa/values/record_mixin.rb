@@ -59,7 +59,7 @@ module Hexa
           when :Str then Values::Str
           when :Bool then Values::Bool
           when :Int then Values::Int
-          when :Flt then Values::Flt
+          when :Real then Values::Real
           when :List then Values::List
           when :Null then Null
           when :Undefined then Values::Undefined
@@ -89,6 +89,12 @@ module Hexa
             .select { |attr| keys.include?(attr.name) }
             .map { |attr| [attr.name, public_send(attr.name)] }
             .to_h
+      end
+
+      def ==(other)
+        self.class.attributes.each do |attr|
+          return false unless send(attr.private_getter) == other.send(attr.private_getter)
+        end
       end
     end
   end

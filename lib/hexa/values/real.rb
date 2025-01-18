@@ -1,6 +1,6 @@
 module Hexa
   module Values
-    class Flt < ::Float
+    class Real < ::Float
       include Scalar
     end
   end
