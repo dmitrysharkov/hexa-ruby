@@ -8,11 +8,11 @@ module Hexa
       @tools_map = {}
     end
 
-
     def add(clazz, &block)
       if clazz < Aggregate
         add_aggregate(clazz, caller[1..-1])
-      else add_tool(clazz, &block)
+      else
+        add_tool(clazz, &block)
       end
     end
 

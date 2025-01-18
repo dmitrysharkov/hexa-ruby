@@ -1,0 +1,10 @@
+require: rubocop-minitest
+
+AllCops:
+  NewCops: enable
+
+Style/Attr:
+  Enabled: false
+
+Style/AccessorGrouping:
+  Enabled: false
