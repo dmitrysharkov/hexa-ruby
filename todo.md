@@ -1,10 +1,10 @@
 ### Values 
 * ~~Validators for primitive types~~
 * Validators for arrays 
-* Validators for array items
+* Validators for array items?
 * Validators for records
-* Validators for attributes records
-* Inline validators for attributes in records
+* Validators for attributes records?
+* Inline validators for attributes in records?
 * ~~Pass Options To validators~~ 
 * ~~Arrays~~ 
 * Groups
@@ -19,6 +19,7 @@
 * Unfolded attributes (prefix, postfix)
 * Arrays inheritance 
 * Constructor (or factory) (Proc)
+* Context -> current errors 
 
 
 ### Formats 

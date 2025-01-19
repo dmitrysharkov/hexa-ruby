@@ -18,6 +18,8 @@ end
 class User < BaseUser
   attr :email, Email | Undefined, desc: 'Email'
   attr :tags, List.of(Str) | Undefined, desc: 'Tags'
+
+  validate(:min_tags, 2) { |val, min_tags| !val.attribute_defined?(:tags) || val.tags.size >= min_tags }
 end
 
 describe Hexa::Values::RecordMixin do

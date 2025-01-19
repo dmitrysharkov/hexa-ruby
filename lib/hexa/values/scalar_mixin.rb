@@ -12,10 +12,6 @@ module Hexa
           @base_class
         end
 
-        def base_class=(clazz)
-          @base_class = clazz
-        end
-
         def construct(val, options = {})
           context = BuilderContext.init(options)
 
@@ -34,26 +30,11 @@ module Hexa
           end
         end
 
-        # def invariants
-        #   @invariants ||= []
-        # end
-        #
-        # INVARIANTS = {
-        #   gt: proc { |val, base| val > base },
-        #   gteq: proc { |val, base| val >= base },
-        #   lt: proc { |val, base| val < base },
-        #   lteq: proc { |val, base| val <= base },
-        #   format: proc { |val, re| re =~ val }
-        # }.freeze
-        #
-        # def validate(name, *args, &block)
-        #   invariants << [name, args, block ? proc(&block) : INVARIANTS[name]]
-        # end
-
         def inherited(subclass)
           super
 
-          subclass.base_class = base_class
+          bc = base_class
+          subclass.instance_exec { @base_class = bc }
           subclass.invariants.inherit(invariants)
         end
       end
@@ -62,7 +43,7 @@ module Hexa
         super
         clazz.extend(ClassMethods)
         clazz.extend(InvariantsMixin)
-        clazz.base_class = clazz.superclass
+        clazz.instance_exec { @base_class = superclass }
       end
     end
   end

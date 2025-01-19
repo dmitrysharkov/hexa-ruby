@@ -3,11 +3,19 @@
 module Hexa
   module Values
     class RecordBuilder
-      attr_reader :attributes, :attributes_map
+      attr_reader :type, :attributes_map
 
-      def initialize(attributes)
-        @attributes = attributes
+      def initialize(type)
+        @type = type
         @attributes_map = attributes.map { |attr| [[attr.name, attr], [attr.name.to_s, attr]] }.flatten(1).to_h
+      end
+
+      def attributes
+        type.attributes
+      end
+
+      def invariants
+        type.invariants
       end
 
       def call(object, source, context)
@@ -36,6 +44,7 @@ module Hexa
         end
 
         build_missed_attrs(object, used_attrs, context)
+        validate(object, context)
       end
 
       def build_from_array(object, arr, context)
@@ -53,6 +62,7 @@ module Hexa
         end
 
         build_missed_attrs(object, used_attrs, context)
+        validate(object, context)
       end
 
       def build_missed_attrs(object, used_attrs, context)
@@ -65,6 +75,10 @@ module Hexa
       def build_attr(object, attr, src, context)
         val, = attr.type.construct(src, context)
         object.send(attr.setter, val)
+      end
+
+      def validate(object, context)
+        invariants.validate(object, context)
       end
     end
   end

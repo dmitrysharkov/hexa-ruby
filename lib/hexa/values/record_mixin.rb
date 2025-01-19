@@ -36,7 +36,7 @@ module Hexa
         end
 
         def builder
-          @builder ||= RecordBuilder.new(attributes)
+          @builder ||= RecordBuilder.new(self)
         end
 
         def construct(source, options = {})
@@ -73,11 +73,13 @@ module Hexa
         def inherited(subclass)
           super
           attributes.each { |attr| subclass.attributes << attr }
+          subclass.invariants.inherit(invariants)
         end
       end
 
       def self.included(clazz)
         clazz.extend(ClassMethods)
+        clazz.extend(InvariantsMixin)
       end
 
       def initialize(*args, **kw_args)
@@ -103,6 +105,10 @@ module Hexa
         self.class.attributes.each do |attr|
           return false unless send(attr.private_getter) == other.send(attr.private_getter)
         end
+      end
+
+      def attribute_defined?(name)
+        send("#{name}_defined?")
       end
     end
   end
