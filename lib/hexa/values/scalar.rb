@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Hexa
   module Values
     module Scalar
@@ -51,7 +53,10 @@ module Hexa
         end
 
         def inherited(subclass)
+          super
+
           subclass.base_class = base_class
+          invariants.each { |inv| subclass.invariants << inv }
         end
       end
 

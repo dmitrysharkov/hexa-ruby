@@ -9,6 +9,7 @@ module Hexa
           @attributes ||= []
         end
 
+
         def attr(name, type, desc: nil)
           attr = Attribute.new(name.to_sym, type, desc)
 
@@ -67,6 +68,10 @@ module Hexa
           else
             raise TypeError
           end
+        end
+
+        def inherited(subclass)
+          attributes.each { |attr| subclass.attributes  << attr }
         end
       end
 

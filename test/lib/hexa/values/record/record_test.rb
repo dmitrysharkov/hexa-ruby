@@ -1,19 +1,20 @@
 # frozen_string_literal: true
 
-require 'minitest/autorun'
-require 'hexa'
-require 'pry-byebug'
+require 'test_helper'
 require 'uri'
 
 class Email < Hexa::Values::Str
   validate(:format, URI::MailTo::EMAIL_REGEXP)
 end
 
-class User
+class BaseUser
   include Hexa::Values::RecordMixin
 
   attr :first_name, Str | Null | Undefined, desc: 'First Name'
   attr :last_name, Str | Null | Undefined, desc:  'Last Name'
+end
+
+class User < BaseUser
   attr :email, Email | Undefined, desc: 'Email'
   attr :tags, List.of(Str) | Undefined, desc: 'Tags'
 end
