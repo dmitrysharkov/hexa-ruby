@@ -1,8 +1,8 @@
 ### Values 
 * ~~Validators for primitive types~~
-* Validators for arrays 
+* ~~Validators for arrays~~ 
 * Validators for array items?
-* Validators for records
+* ~~Validators for records~~
 * Validators for attributes records?
 * Inline validators for attributes in records?
 * ~~Pass Options To validators~~ 
@@ -17,17 +17,24 @@
 * Custom options in attributes 
 * Enum
 * Unfolded attributes (prefix, postfix)
-* Arrays inheritance 
+* ~~Arrays inheritance~~
 * Constructor (or factory) (Proc)
 * Context -> current errors 
+* Add GDPR/Private info 
+* Add Access Rights {allow_if, allow_unless}
+* Validate Method 
 
 
 ### Formats 
 * From Rails Params? 
-* From/To JSON 
-* From/To CSV 
-* From/To XML (not now)
-* From/TO Excel
+* From JSON 
+* TO JOSN 
+* From CSV
+* TO CSV
+* From XML (not now)
+* TO XML
+* From Excel
+* TO Excel 
 
 ### Pipes
 * Lazy Loading
@@ -42,6 +49,7 @@
 * Change Sets
 * SQL Repositories for Entities 
 * SQL Schema Generation For Entities
+* GDPR/Private Info 
 
 ### Events 
 * SQL Event Store

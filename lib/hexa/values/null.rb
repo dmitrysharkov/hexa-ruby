@@ -2,7 +2,7 @@
 
 module Hexa
   module Values
-    class Null < NilClass
+    class Null < ::NilClass
       include ScalarMixin
     end
   end

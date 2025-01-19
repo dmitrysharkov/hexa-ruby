@@ -38,6 +38,13 @@ module Hexa
         context.error(:format)
         [nil, context.errors]
       end
+
+      def write_to_json(val, stream)
+        type = @types.detect do |t|
+          val.is_a?(t) || (t < ScalarMixin && val.is_a?(t.base_class)) || t < List && val.is_a?(Array)
+        end
+        type.write_to_json(val, stream)
+      end
     end
   end
 end

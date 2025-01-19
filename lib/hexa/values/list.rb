@@ -38,13 +38,27 @@ module Hexa
           end
         end
 
-        include InvariantsMixin
+        def write_to_json(val, stream)
+          stream.write('[')
+          cnt = 0
+          val.each do |x|
+            next if x.is_a?(Undefined)
+
+            stream.write(',') if cnt > 1
+
+            item_type.write_to_json(x, stream)
+            cnt += 1
+          end
+          stream.write(']')
+        end
 
         def inherited(subclass)
           super
           subclass.item(item_type)
           subclass.invariants.inherit(invariants)
         end
+
+        include InvariantsMixin
       end
     end
   end

@@ -75,6 +75,21 @@ module Hexa
           attributes.each { |attr| subclass.attributes << attr }
           subclass.invariants.inherit(invariants)
         end
+
+        def write_to_json(val, stream)
+          stream.write('{')
+          cnt = 0
+          attributes.each do |attr|
+            next unless val.public_send(attr.defined_predicate_name)
+
+            stream.write(',') if cnt > 0
+            stream.write(attr.camelized_name)
+            stream.write(':')
+            attr.type.write_to_json(val.public_send(attr.name), stream)
+            cnt += 1
+          end
+          stream.write('}')
+        end
       end
 
       def self.included(clazz)
@@ -109,6 +124,12 @@ module Hexa
 
       def attribute_defined?(name)
         send("#{name}_defined?")
+      end
+
+      def to_json(_options = nil)
+        stream = StringIO.new
+        self.class.write_to_json(self, stream)
+        stream.string
       end
     end
   end

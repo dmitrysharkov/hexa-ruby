@@ -111,4 +111,11 @@ describe Hexa::Values::RecordMixin do
       refute_equal @u3, @u4
     end
   end
+
+  specify :to_json do
+    json = "{firstName:\"John\",lastName:\"Doe\",email:\"john@google.com\",tags:[\"aaa\"\"bbb\",\"ccc\"]}"
+    user = User.new(first_name: 'John', last_name: 'Doe', email: 'john@google.com', tags: %w[aaa bbb ccc])
+
+    assert_equal json, user.to_json
+  end
 end

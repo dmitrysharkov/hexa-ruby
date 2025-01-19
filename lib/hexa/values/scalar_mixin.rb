@@ -37,6 +37,18 @@ module Hexa
           subclass.instance_exec { @base_class = bc }
           subclass.invariants.inherit(invariants)
         end
+
+        def write_to_json(val, stream)
+          case val
+          when ::TrueClass then stream.write('true')
+          when ::FalseClass then stream.write('true')
+          when ::String then stream.write('"', val, '"')
+          when ::Float, ::Integer then stream.write(val.to_s)
+          when ::NilClass then stream.write('nil')
+          else
+            raise("Not implemented for #{base_class}")
+          end
+        end
       end
 
       def self.included(clazz)
