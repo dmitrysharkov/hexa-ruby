@@ -2,7 +2,7 @@
 
 module Hexa
   module Values
-    module Scalar
+    module ScalarMixin
       module ClassMethods
         def |(other)
           Union.new(self, other)
@@ -24,9 +24,7 @@ module Hexa
           elsif !val.is_a?(base_class)
             context.error(:expected_type, base_class)
           else
-            invariants.each do |name, attributes, fn|
-              context.error(name, *attributes) unless fn.call(val, *attributes)
-            end
+            invariants.validate(val, context)
           end
 
           if context.errors?
@@ -36,32 +34,34 @@ module Hexa
           end
         end
 
-        def invariants
-          @invariants ||= []
-        end
-
-        INVARIANTS = {
-          gt: proc { |val, base| val > base },
-          gteq: proc { |val, base| val >= base },
-          lt: proc { |val, base| val < base },
-          lteq: proc { |val, base| val <= base },
-          format: proc { |val, re| re =~ val }
-        }.freeze
-
-        def validate(name, *args, &block)
-          invariants << [name, args, block ? proc(&block) : INVARIANTS[name]]
-        end
+        # def invariants
+        #   @invariants ||= []
+        # end
+        #
+        # INVARIANTS = {
+        #   gt: proc { |val, base| val > base },
+        #   gteq: proc { |val, base| val >= base },
+        #   lt: proc { |val, base| val < base },
+        #   lteq: proc { |val, base| val <= base },
+        #   format: proc { |val, re| re =~ val }
+        # }.freeze
+        #
+        # def validate(name, *args, &block)
+        #   invariants << [name, args, block ? proc(&block) : INVARIANTS[name]]
+        # end
 
         def inherited(subclass)
           super
 
           subclass.base_class = base_class
-          invariants.each { |inv| subclass.invariants << inv }
+          subclass.invariants.inherit(invariants)
         end
       end
 
       def self.included(clazz)
+        super
         clazz.extend(ClassMethods)
+        clazz.extend(InvariantsMixin)
         clazz.base_class = clazz.superclass
       end
     end

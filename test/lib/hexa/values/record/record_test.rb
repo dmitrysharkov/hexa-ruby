@@ -2,9 +2,10 @@
 
 require 'test_helper'
 require 'uri'
+require 'pry-byebug'
 
 class Email < Hexa::Values::Str
-  validate(:format, URI::MailTo::EMAIL_REGEXP)
+  validate(:pattern, URI::MailTo::EMAIL_REGEXP)
 end
 
 class BaseUser

@@ -71,7 +71,8 @@ module Hexa
         end
 
         def inherited(subclass)
-          attributes.each { |attr| subclass.attributes  << attr }
+          super
+          attributes.each { |attr| subclass.attributes << attr }
         end
       end
 

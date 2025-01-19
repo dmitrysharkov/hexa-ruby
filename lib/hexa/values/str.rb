@@ -3,7 +3,12 @@
 module Hexa
   module Values
     class Str < ::String
-      include Scalar
+      include ScalarMixin
+
+      invariant(:pattern, ::Regexp) { |val, re| re =~ val }
+      invariant(:max_len, ::Integer) { |val, max_len| val.size <= max_len }
+      invariant(:min_len, ::Integer) { |val, min_len| val.size >= min_len }
+      invariant(:len, ::Integer) { |val, len| val.size >= len }
     end
   end
 end

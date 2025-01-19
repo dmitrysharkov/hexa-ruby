@@ -3,7 +3,7 @@
 module Hexa
   module Values
     class Bool < TrueClass
-      include Scalar
+      include ScalarMixin
     end
   end
 end

@@ -37,6 +37,14 @@ module Hexa
             [nil, context.errors]
           end
         end
+
+        include InvariantsMixin
+
+        def inherited(subclass)
+          super
+          subclass.item(item_type)
+          subclass.invariants.inherit(invariants)
+        end
       end
     end
   end
