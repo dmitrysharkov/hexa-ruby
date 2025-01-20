@@ -26,19 +26,19 @@ module Hexa
         raise NotImplementedError
       end
 
-      def start_array(arr)
+      def start_array(arr_type, arr)
         raise NotImplementedError
       end
 
-      def end_array(arr)
+      def end_array(arr_type, arr)
         raise NotImplementedError
       end
 
-      def start_array_item(arr, value, index, is_last)
+      def start_array_item(arr_type, arr, value, index, is_last)
         raise NotImplementedError
       end
 
-      def end_array_item(record, value, index, is_last)
+      def end_array_item(arr_type, arr, value, index, is_last)
         raise NotImplementedError
       end
 

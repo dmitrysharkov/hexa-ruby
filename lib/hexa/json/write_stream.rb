@@ -19,17 +19,17 @@ module Hexa
         write(',') unless is_last
       end
 
-      def start_array(_arr)
+      def start_array(_arr_type, _arr)
         write('[')
       end
 
-      def end_array(_arr)
+      def end_array(_arr_type, _arr)
         write(']')
       end
 
-      def start_array_item(_arr, _value, _index, _is_last); end
+      def start_array_item(_arr_type, _arr, _value, _index, _is_last); end
 
-      def end_array_item(_record, _value, _index, is_last)
+      def end_array_item(_arr_type, _arr, _value, _index, is_last)
         write(',') unless is_last
       end
 

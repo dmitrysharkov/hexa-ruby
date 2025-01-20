@@ -32,24 +32,24 @@ module Hexa
           end
 
           if context.errors.size == errors_before
-            [arr, nil]
+            [arr.freeze, nil]
           else
             [nil, context.errors]
           end
         end
 
         def write_to_stream(list, stream)
-          stream.start_array(list)
+          stream.start_array(self, list)
 
           list.each.with_index do |val, idx|
             next if val.is_a?(Undefined)
 
             last = (idx == list.size - 1)
-            stream.start_array_item(list, val, idx, last)
+            stream.start_array_item(self, list, val, idx, last)
             item_type.write_to_stream(val, stream)
-            stream.end_array_item(list, val, idx, last)
+            stream.end_array_item(self, list, val, idx, last)
           end
-          stream.end_array(list)
+          stream.end_array(self, list)
         end
 
         def inherited(subclass)
