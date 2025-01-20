@@ -77,25 +77,6 @@ module Hexa
           subclass.invariants.inherit(invariants)
         end
 
-        def write_to_stream(record, stream)
-          stream.start_object(record)
-
-          defined_attrs = attributes.select { |a| record.attribute_defined?(a.name) }
-          last_idx = defined_attrs.count - 1
-
-          defined_attrs.each.with_index do |attr, idx|
-            next unless record.attribute_defined?(attr.name)
-
-            val = record.attribute_value(attr.name)
-
-            stream.start_object_attribute(record, attr, val, idx, idx == last_idx)
-            attr.type.write_to_stream(val, stream)
-            stream.end_object_attribute(record, attr, val, idx, idx == last_idx)
-          end
-
-          stream.end_object(record)
-        end
-
         def [](**validators)
           Class.new(self) do
             validators.each do |predicate, params|

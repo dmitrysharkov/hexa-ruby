@@ -36,20 +36,6 @@ module Hexa
           end
         end
 
-        def write_to_stream(list, stream)
-          stream.start_array(self, list)
-
-          list.each.with_index do |val, idx|
-            next if val.is_a?(Undefined)
-
-            last = (idx == list.size - 1)
-            stream.start_array_item(self, list, val, idx, last)
-            item_type.write_to_stream(val, stream)
-            stream.end_array_item(self, list, val, idx, last)
-          end
-          stream.end_array(self, list)
-        end
-
         def inherited(subclass)
           super
           subclass.item(item_type)

@@ -3,7 +3,7 @@ module Hexa
     def self.generate(val, **options)
       io = StringIO.new
       stream = WriteStream.new(io, **options)
-      val.class.write_to_stream(val, stream)
+      stream.write(val)
       io.string
     end
   end

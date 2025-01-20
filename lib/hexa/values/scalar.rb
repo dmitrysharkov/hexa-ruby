@@ -85,20 +85,6 @@ module Hexa
           serializer ? serializer.call(val) : val
         end
 
-        def write_to_stream(val, stream)
-          val = serialize_value(val)
-          case val
-          when ::TrueClass then stream.write_bool(val)
-          when ::FalseClass then stream.write_bool(val)
-          when ::String then stream.write_str(val)
-          when ::Integer then stream.write_int(val)
-          when ::Float then stream.write_real(val)
-          when ::NilClass then stream.write_null
-          else
-            raise("Not implemented for #{base_class}")
-          end
-        end
-
         def [](**validators)
           Class.new(self) do
             validators.each do |predicate, params|

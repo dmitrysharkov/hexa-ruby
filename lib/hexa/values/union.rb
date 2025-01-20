@@ -39,11 +39,10 @@ module Hexa
         [nil, context.errors]
       end
 
-      def write_to_stream(val, stream)
-        type = @types.detect do |t|
+      def value_type(val)
+        @types.detect do |t|
           val.is_a?(t) || (t < Scalar && val.is_a?(t.base_class)) || t < List && val.is_a?(Array)
         end
-        type.write_to_stream(val, stream)
       end
     end
   end
