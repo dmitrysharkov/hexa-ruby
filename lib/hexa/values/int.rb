@@ -7,6 +7,12 @@ module Hexa
 
       self.base_class = ::Integer
 
+      coerce String do |val|
+        [Integer(val), true]
+      rescue ArgumentError
+        [nil, false]
+      end
+
       invariant(:gt, ::Integer) { |val, base| val > base }
       invariant(:gteq, ::Integer) { |val, base| val >= base }
       invariant(:lt, ::Integer) { |val, base| val < base }

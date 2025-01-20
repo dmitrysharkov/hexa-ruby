@@ -12,17 +12,21 @@
 * ~~Validators for records~~
 * ~~Pass Options To validators~~ 
 * ~~Arrays~~ 
-* When added andfine to array then skip
+* When added undefined to array then skip
 * Groups
 * ~~Inheritance~~ 
 * Defaults for undefined 
 * Better error messages for type mismatch 
-* Coercing 
-* Serialization
-* Parse Primitives from String
+* ~~Coercing~~ 
+* ~~Serialization~~
+* Coercing for records 
+* Serialization for records
+* Pass Options to Coercing 
+* ~~Parse Primitives from String~~
 * Equality
 * Custom options in attributes 
 * Enum
+* Const Values 
 * Unfolded attributes (prefix, postfix)
 * ~~Arrays inheritance~~
 * Constructor (or factory) (Proc)
