@@ -1,17 +1,23 @@
+## Principles
+
+* It has to be only one way to define something 
+* Automatic documentation generation 
+
+
+## Parts 
+
 ### Values 
 * ~~Validators for primitive types~~
-* ~~Validators for arrays~~ 
-* Validators for array items?
+* ~~Validators for arrays~~
 * ~~Validators for records~~
-* Validators for attributes records?
-* Inline validators for attributes in records?
 * ~~Pass Options To validators~~ 
 * ~~Arrays~~ 
+* When added andfine to array then skip
 * Groups
 * ~~Inheritance~~ 
 * Defaults for undefined 
 * Better error messages for type mismatch 
-* Coercing
+* Coercing (with JSON)
 * Parse Primitives from String
 * Equality
 * Custom options in attributes 
@@ -23,23 +29,31 @@
 * Add GDPR/Private info 
 * Add Access Rights {allow_if, allow_unless}
 * Validate Method 
-
+* Documentation Generation
+* Reading Stream 
+* Writing Stream 
+* Annotation Style 
+* [] operation to add inherit and add validators 
+* Make List a Enumerable
 
 ### Formats 
-* From Rails Params? 
+* From Rails Params
 * From JSON 
-* TO JOSN 
+* ~~TO JOSN~~ 
+* To JSON with writing stream 
+* To JSON with reading stream 
 * From CSV
 * TO CSV
 * From XML (not now)
 * TO XML
 * From Excel
 * TO Excel 
+* To INI
+* From INI
 
 ### Pipes
 * Lazy Loading
 * Piping
-
 
 ### Entities 
 * ids
@@ -58,9 +72,53 @@
 ### Commands 
 * Command Options (including validators)
 * Projections 
+* Command Pipelines 
+* Documentation Generation 
+
+### Queries 
+* Params 
+* Response 
+* Documentation Generation
+
+### Application Services 
  
-### FrontEnd
-* OpenAPI
+### Application Adapters  
+* OpenAPI / Schemas 
+    - server
+    - generate server contract  
+    - validate server contract
+    - client 
+    - generate client
 * GraphQL
+   - server 
+   - generate server contract 
+   - validate server contract 
+   - client 
+   - generate client 
+* gRPC / Protobuf
+   - server
+   - generate server contract
+   - validate server contract
+   - client
+   - generate client
+* Apache Arvo 
+  - server
+  - generate server contract
+  - validate server contract
+  - client
+  - generate client
+* Web Sockets 
+* Cmd
+* Console 
+
+### Application Event Buses
+* SQS
+* Kafka 
+
+### Access Control 
+* ReBAC
+* RBAC
+* ABAC
+
 
 

@@ -38,13 +38,14 @@ module Hexa
           subclass.invariants.inherit(invariants)
         end
 
-        def write_to_json(val, stream)
+        def write_to_stream(val, stream)
           case val
-          when ::TrueClass then stream.write('true')
-          when ::FalseClass then stream.write('true')
-          when ::String then stream.write('"', val, '"')
-          when ::Float, ::Integer then stream.write(val.to_s)
-          when ::NilClass then stream.write('nil')
+          when ::TrueClass then stream.write_bool(val)
+          when ::FalseClass then stream.write_bool(val)
+          when ::String then stream.write_str(val)
+          when ::Integer then stream.write_int(val)
+          when ::Float then stream.write_real(val)
+          when ::NilClass then stream.write_null
           else
             raise("Not implemented for #{base_class}")
           end

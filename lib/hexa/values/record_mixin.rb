@@ -76,19 +76,23 @@ module Hexa
           subclass.invariants.inherit(invariants)
         end
 
-        def write_to_json(val, stream)
-          stream.write('{')
-          cnt = 0
-          attributes.each do |attr|
-            next unless val.public_send(attr.defined_predicate_name)
+        def write_to_stream(record, stream)
+          stream.start_object(record)
 
-            stream.write(',') if cnt > 0
-            stream.write(attr.camelized_name)
-            stream.write(':')
-            attr.type.write_to_json(val.public_send(attr.name), stream)
-            cnt += 1
+          defined_attrs = attributes.select { |a| record.attribute_defined?(a.name) }
+          last_idx = defined_attrs.count - 1
+
+          defined_attrs.each.with_index do |attr, idx|
+            next unless record.attribute_defined?(attr.name)
+
+            val = record.attribute_value(attr.name)
+
+            stream.start_object_attribute(record, attr, val, idx, idx == last_idx)
+            attr.type.write_to_stream(val, stream)
+            stream.end_object_attribute(record, attr, val, idx, idx == last_idx)
           end
-          stream.write('}')
+
+          stream.end_object(record)
         end
       end
 
@@ -126,10 +130,8 @@ module Hexa
         send("#{name}_defined?")
       end
 
-      def to_json(_options = nil)
-        stream = StringIO.new
-        self.class.write_to_json(self, stream)
-        stream.string
+      def attribute_value(name)
+        send(name)
       end
     end
   end

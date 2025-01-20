@@ -38,18 +38,18 @@ module Hexa
           end
         end
 
-        def write_to_json(val, stream)
-          stream.write('[')
-          cnt = 0
-          val.each do |x|
-            next if x.is_a?(Undefined)
+        def write_to_stream(list, stream)
+          stream.start_array(list)
 
-            stream.write(',') if cnt > 1
+          list.each.with_index do |val, idx|
+            next if val.is_a?(Undefined)
 
-            item_type.write_to_json(x, stream)
-            cnt += 1
+            last = (idx == list.size - 1)
+            stream.start_array_item(list, val, idx, last)
+            item_type.write_to_stream(val, stream)
+            stream.end_array_item(list, val, idx, last)
           end
-          stream.write(']')
+          stream.end_array(list)
         end
 
         def inherited(subclass)
