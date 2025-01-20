@@ -17,7 +17,8 @@
 * ~~Inheritance~~ 
 * Defaults for undefined 
 * Better error messages for type mismatch 
-* Coercing (with JSON)
+* Coercing 
+* Serialization
 * Parse Primitives from String
 * Equality
 * Custom options in attributes 
@@ -31,9 +32,9 @@
 * Validate Method 
 * Documentation Generation
 * Reading Stream 
-* Writing Stream 
+* ~~Writing Stream~~ 
 * Annotation Style 
-* [] operation to add inherit and add validators
+* ~~[] operation to add inherit and add validators~~
 
 ### Formats 
 * From Rails Params

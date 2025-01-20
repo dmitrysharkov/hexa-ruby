@@ -10,10 +10,6 @@ module Hexa
           @item_type = type
         end
 
-        # def of(type)
-        #   Class.new(List) { item type }
-        # end
-
         def |(other)
           Union.new(self, other)
         end

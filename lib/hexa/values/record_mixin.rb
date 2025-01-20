@@ -62,6 +62,7 @@ module Hexa
           when :Int then Values::Int
           when :Real then Values::Real
           when :List then Values::List
+          when :Dt then Values::Dt
           when :Null then Null
           when :Undefined then Values::Undefined
           when :Values, :V, :Val then Values
