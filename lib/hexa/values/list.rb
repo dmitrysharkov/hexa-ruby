@@ -10,9 +10,9 @@ module Hexa
           @item_type = type
         end
 
-        def of(type)
-          Class.new(List) { item type }
-        end
+        # def of(type)
+        #   Class.new(List) { item type }
+        # end
 
         def |(other)
           Union.new(self, other)
@@ -58,8 +58,25 @@ module Hexa
           subclass.invariants.inherit(invariants)
         end
 
+        def [](item_type, **validators)
+          Class.new(List) do
+            item(item_type)
+            validators.each do |predicate, params|
+              if params.is_a?(TrueClass)
+                validate(predicate)
+              else
+                validate(predicate, *params)
+              end
+            end
+          end
+        end
+
         include InvariantsMixin
       end
+
+      invariant(:max_len, ::Integer) { |val, max_len| val.size <= max_len }
+      invariant(:min_len, ::Integer) { |val, min_len| val.size >= min_len }
+      invariant(:len_eq, ::Integer) { |val, len| val.size == len }
     end
   end
 end

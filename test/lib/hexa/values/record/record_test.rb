@@ -4,13 +4,13 @@ require 'test_helper'
 require 'uri'
 require 'pry-byebug'
 
-class Email < Hexa::Values::Str
-  validate(:pattern, URI::MailTo::EMAIL_REGEXP)
-end
+# class Email < Hexa::Values::Str
+#   validate(:pattern, URI::MailTo::EMAIL_REGEXP)
+# end
 
-class BaseRecord
-  include Hexa::Values::RecordMixin
+Email = Hexa::Values::Str[pattern: URI::MailTo::EMAIL_REGEXP]
 
+class BaseRecord < Hexa::Values::Record
   def to_json(options = {})
     Hexa::Json.generate(self, **options)
   end
@@ -23,7 +23,7 @@ end
 
 class User < BaseUser
   attr :email, Email | Undefined, desc: 'Email'
-  attr :tags, List.of(Str) | Undefined, desc: 'Tags'
+  attr :tags, List[Str, min_len: 3] | Undefined, desc: 'Tags'
 
   validate(:min_tags, 2) { |val, min_tags| !val.attribute_defined?(:tags) || val.tags.size >= min_tags }
 end

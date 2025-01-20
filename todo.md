@@ -33,8 +33,7 @@
 * Reading Stream 
 * Writing Stream 
 * Annotation Style 
-* [] operation to add inherit and add validators 
-* Make List a Enumerable
+* [] operation to add inherit and add validators
 
 ### Formats 
 * From Rails Params
