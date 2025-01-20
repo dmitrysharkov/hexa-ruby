@@ -2,9 +2,7 @@
 
 module Hexa
   module Values
-    class Null
-      include ScalarMixin
-
+    class Null < Scalar
       self.base_class = NilClass
 
       coerce String do |val|

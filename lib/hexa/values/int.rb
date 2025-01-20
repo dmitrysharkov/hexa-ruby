@@ -2,9 +2,7 @@
 #
 module Hexa
   module Values
-    class Int
-      include ScalarMixin
-
+    class Int < Scalar
       self.base_class = ::Integer
 
       coerce String do |val|

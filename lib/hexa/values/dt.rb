@@ -1,8 +1,6 @@
 module Hexa
   module Values
-    class Dt
-      include ScalarMixin
-
+    class Dt < Scalar
       self.base_class = ::Date
 
       invariant(:gt, ::Date) { |val, base| val > base }

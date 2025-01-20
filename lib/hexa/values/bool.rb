@@ -2,13 +2,11 @@
 
 module Hexa
   module Values
-    class Bool
-      include ScalarMixin
+    class Bool < Scalar
+      self.base_class = TrueClass
 
       TRUE_STRINGS = %w[ture yes].freeze
       FALSE_STRINGS = %w[false no].freeze
-
-      self.base_class = TrueClass
 
       coerce String do |val|
         val = val.downcase

@@ -2,8 +2,8 @@
 
 module Hexa
   module Values
-    module ScalarMixin
-      module ClassMethods
+    class Scalar
+      class << self
         def |(other)
           Union.new(self, other)
         end
@@ -41,13 +41,6 @@ module Hexa
             context.error(:expected_type, [base_class] + coercers.keys)
           end
 
-          # if val.is_a?(Undefined)
-          #   context.error(:missed)
-          # elsif !val.is_a?(base_class)
-          #   context.error(:expected_type, base_class)
-          # else
-          #   invariants.validate(val, context)
-          # end
 
           if context.errors?
             [nil, context.errors]
@@ -64,12 +57,6 @@ module Hexa
 
           coercer[1].call(val)
         end
-        #   if val.is_a?(Undefined)
-        #     []
-        #   elsif !val.is_a?(base_class)
-        #     context.error(:expected_type, base_class)
-        #   else
-        # end
 
         def inherited(subclass)
           super
@@ -123,12 +110,8 @@ module Hexa
             end
           end
         end
-      end
 
-      def self.included(clazz)
-        super
-        clazz.extend(ClassMethods)
-        clazz.extend(InvariantsMixin)
+        include InvariantsMixin
       end
     end
   end

@@ -2,9 +2,7 @@
 
 module Hexa
   module Values
-    class Real
-      include ScalarMixin
-
+    class Real < Scalar
       self.base_class = ::Float
 
       coerce String do |val|
