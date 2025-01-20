@@ -2,7 +2,7 @@
 
 module Hexa
   module Values
-    class List
+    class List < ::Array
       class << self
         attr_reader :item_type
 
@@ -23,8 +23,10 @@ module Hexa
           end
 
           errors_before = context.errors.size
-          arr = source.map.with_index do |src, idx|
-            context.push(idx) { item_type.construct(src, context).first }
+
+          arr = new
+          source.each.with_index do |src, idx|
+            context.push(idx) { arr << item_type.construct(src, context).first }
           end
 
           if context.errors.size == errors_before
