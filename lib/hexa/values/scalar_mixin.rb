@@ -12,6 +12,10 @@ module Hexa
           @base_class
         end
 
+        def base_class=(base_class)
+          @base_class = base_class
+        end
+
         def construct(val, options = {})
           context = BuilderContext.init(options)
 
@@ -33,8 +37,7 @@ module Hexa
         def inherited(subclass)
           super
 
-          bc = base_class
-          subclass.instance_exec { @base_class = bc }
+          subclass.base_class = base_class
           subclass.invariants.inherit(invariants)
         end
 
@@ -68,7 +71,6 @@ module Hexa
         super
         clazz.extend(ClassMethods)
         clazz.extend(InvariantsMixin)
-        clazz.instance_exec { @base_class = superclass }
       end
     end
   end

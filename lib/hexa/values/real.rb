@@ -2,8 +2,10 @@
 
 module Hexa
   module Values
-    class Real < ::Float
+    class Real
       include ScalarMixin
+
+      self.base_class = ::Float
 
       invariant(:gt, ::Numeric) { |val, base| val > base }
       invariant(:gteq, ::Numeric) { |val, base| val >= base }

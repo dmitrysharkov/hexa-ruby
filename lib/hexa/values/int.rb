@@ -2,8 +2,10 @@
 #
 module Hexa
   module Values
-    class Int < ::Integer
+    class Int
       include ScalarMixin
+
+      self.base_class = ::Integer
 
       invariant(:gt, ::Integer) { |val, base| val > base }
       invariant(:gteq, ::Integer) { |val, base| val >= base }

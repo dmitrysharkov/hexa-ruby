@@ -2,8 +2,10 @@
 
 module Hexa
   module Values
-    class Null < ::NilClass
+    class Null
       include ScalarMixin
+
+      self.base_class = NilClass
     end
   end
 end

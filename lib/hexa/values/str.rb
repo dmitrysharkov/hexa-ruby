@@ -2,8 +2,10 @@
 
 module Hexa
   module Values
-    class Str < ::String
+    class Str
       include ScalarMixin
+
+      self.base_class = ::String
 
       invariant(:pattern, ::Regexp) { |val, re| re =~ val }
       invariant(:max_len, ::Integer) { |val, max_len| val.size <= max_len }

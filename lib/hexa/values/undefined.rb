@@ -7,7 +7,7 @@ module Hexa
         @instance ||= new
       end
 
-      def self.construct(val, options = {})
+      def self.construct(val, _options = {})
         if val.is_a?(Undefined)
           [val, nil]
         else
