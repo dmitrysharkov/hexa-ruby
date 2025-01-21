@@ -8,9 +8,9 @@ require 'pry-byebug'
 #   validate(:pattern, URI::MailTo::EMAIL_REGEXP)
 # end
 
-Email = Hexa::Values::Str[pattern: URI::MailTo::EMAIL_REGEXP]
+Email = Hexa::Adt::Str[pattern: URI::MailTo::EMAIL_REGEXP]
 
-class BaseRecord < Hexa::Values::Record
+class BaseRecord < Hexa::Adt::Record
   def to_json(options = {})
     Hexa::Json.generate(self, **options)
   end
@@ -33,7 +33,7 @@ class User < Person
   validate(:min_tags, 2) { |val, min_tags| !val.attribute_defined?(:tags) || val.tags.size >= min_tags }
 end
 
-describe Hexa::Values::RecordMixin do
+describe Hexa::Adt::RecordMixin do
   describe 'class' do
     it 'lists all attributes names' do
       assert_equal %i[first_name last_name dob email tags], User.attributes.map(&:name)

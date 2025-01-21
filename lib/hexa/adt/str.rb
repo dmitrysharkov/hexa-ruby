@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Hexa
-  module Values
+  module Adt
     class Str < Scalar
       self.base_class = ::String
 

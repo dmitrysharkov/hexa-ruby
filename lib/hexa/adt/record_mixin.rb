@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Hexa
-  module Values
+  module Adt
     module RecordMixin
       # Record class methods
       module ClassMethods
@@ -58,15 +58,15 @@ module Hexa
         # rubocop:disable Metrics/CyclomaticComplexity,Metrics/MethodLength
         def const_missing(name)
           case name
-          when :Str then Values::Str
-          when :Bool then Values::Bool
-          when :Int then Values::Int
-          when :Real then Values::Real
-          when :List then Values::List
-          when :Dt then Values::Dt
+          when :Str then Adt::Str
+          when :Bool then Adt::Bool
+          when :Int then Adt::Int
+          when :Real then Adt::Real
+          when :List then Adt::List
+          when :Dt then Adt::Dt
           when :Null then Null
-          when :Undefined then Values::Undefined
-          when :Values, :V, :Val then Values
+          when :Undefined then Adt::Undefined
+          when :Adt then Adt
           else
             raise TypeError
           end

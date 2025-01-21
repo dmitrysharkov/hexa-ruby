@@ -1,5 +1,5 @@
 module Hexa
-  module Values
+  module Adt
     module InvariantsMixin
       def invariants
         @invariants ||= Invariants.new

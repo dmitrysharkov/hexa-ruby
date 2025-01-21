@@ -1,5 +1,5 @@
 module Hexa
-  module Values
+  module Adt
     class Dt < Scalar
       self.base_class = ::Date
 

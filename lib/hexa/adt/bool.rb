@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Hexa
-  module Values
+  module Adt
     class Bool < Scalar
       self.base_class = TrueClass
 
@@ -26,6 +26,10 @@ module Hexa
         when 1 then [true, true]
         else [nil, false]
         end
+      end
+
+      coerce FalseClass do |val|
+        val
       end
     end
   end

@@ -10,8 +10,8 @@ module Hexa
 
       def write(data, type = nil)
         case data
-        when Values::RecordMixin then write_record(data)
-        when Values::List then write_array(data)
+        when Adt::RecordMixin then write_record(data)
+        when Adt::List then write_array(data)
         else write_scalar(data, type)
         end
       end
@@ -38,7 +38,7 @@ module Hexa
         out('[')
         first = true
         data.each.with_index do |val, idx|
-          next if val.is_a?(Values::Undefined)
+          next if val.is_a?(Adt::Undefined)
 
           out(',') unless first
           first = false
@@ -53,7 +53,7 @@ module Hexa
       end
 
       def write_scalar(data, type)
-        type = type.value_type(data) if type.is_a?(Values::Union)
+        type = type.value_type(data) if type.is_a?(Adt::Union)
         val = type.serialize_value(data)
         case val
         when TrueClass then out('true')

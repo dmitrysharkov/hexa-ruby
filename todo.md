@@ -53,7 +53,7 @@
 * Replace Record Mixin with Record Type (command, event, etc. will be inherited from Record)
 * Rename Everything like Ruby native types (Object, Array, Integer, Float, ...)
 * In annotations/Unions check that operands are expected types (not native types)
-* Cortage as a mix of Array and Record  
+* Cortege as a mix of Array and Record  
 * Tuple as Array with fixed items only 
 * Pretty Print 
 

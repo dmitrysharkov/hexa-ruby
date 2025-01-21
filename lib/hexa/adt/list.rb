@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Hexa
-  module Values
+  module Adt
     class List < ::Array
       class << self
         def items_annotate(type)

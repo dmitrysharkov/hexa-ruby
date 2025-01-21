@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 #
 module Hexa
-  module Values
+  module Adt
     class Int < Scalar
       self.base_class = ::Integer
 

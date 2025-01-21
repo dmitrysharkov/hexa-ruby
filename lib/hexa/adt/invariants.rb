@@ -1,5 +1,5 @@
 module Hexa
-  module Values
+  module Adt
     class Invariants
       Validator = Struct.new(:name, :params, :fn, :require_options)
       Predicate = Struct.new(:name, :types, :fn)

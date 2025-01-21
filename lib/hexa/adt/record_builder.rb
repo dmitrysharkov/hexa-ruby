@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Hexa
-  module Values
+  module Adt
     class RecordBuilder
       attr_reader :type, :attributes_map
 

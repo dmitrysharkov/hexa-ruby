@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Hexa
-  module Values
+  module Adt
     class Attribute
       attr_reader :name, :setter, :private_getter, :type, :description, :defined_predicate_name, :camelized_name_str
 
