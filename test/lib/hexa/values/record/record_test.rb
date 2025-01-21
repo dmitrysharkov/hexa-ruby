@@ -17,14 +17,18 @@ class BaseRecord < Hexa::Values::Record
 end
 
 class Person < BaseRecord
-  attr :first_name, Str | Null | Undefined, desc: 'First Name'
-  attr :last_name, Str | Null | Undefined, desc:  'Last Name'
-  attr :dob, Dt | Undefined, desc: 'Date of Birth'
+  attr_reader :first_name, :last_name, :dob
+
+  attr_annotate :first_name, Str | Null | Undefined, desc: 'First Name'
+  attr_annotate :last_name, Str | Null | Undefined, desc:  'Last Name'
+  attr_annotate :dob, Dt | Undefined, desc: 'Date of Birth'
 end
 
 class User < Person
-  attr :email, Email | Undefined, desc: 'Email'
-  attr :tags, List[Str, prefix_items: [Int], min_len: 3, uniq: true] | Undefined, desc: 'Tags'
+  attr_reader :email, :tags
+
+  attr_annotate :email, Email | Undefined, desc: 'Email'
+  attr_annotate :tags, List[Str, prefix_items: [Int], min_len: 3, uniq: true] | Undefined, desc: 'Tags'
 
   validate(:min_tags, 2) { |val, min_tags| !val.attribute_defined?(:tags) || val.tags.size >= min_tags }
 end

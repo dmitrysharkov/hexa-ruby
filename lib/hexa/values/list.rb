@@ -4,13 +4,13 @@ module Hexa
   module Values
     class List < ::Array
       class << self
-        def annotate_items(type)
+        def items_annotate(type)
           @items = type
         end
 
         attr_reader :items
 
-        def annotate_prefix_items(*types)
+        def prefix_items_annotate(*types)
           types.each { |t| prefix_items << t }
         end
 
@@ -64,17 +64,17 @@ module Hexa
 
         def inherited(subclass)
           super
-          subclass.annotate_items(items)
+          subclass.items_annotate(items)
           subclass.invariants.inherit(invariants)
-          subclass.annotate_prefix_items(*prefix_items)
+          subclass.prefix_items_annotate(*prefix_items)
         end
 
         def [](items = nil, prefix_items: [], **validators)
           Class.new(List) do
-            annotate_items(items)
+            items_annotate(items)
 
             prefix_items = [prefix_items] unless prefix_items.is_a?(Array)
-            annotate_prefix_items(*prefix_items)
+            prefix_items_annotate(*prefix_items)
 
             validators.each do |predicate, params|
               if params.is_a?(TrueClass)

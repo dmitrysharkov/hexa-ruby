@@ -10,18 +10,19 @@ module Hexa
         end
 
 
-        def attr(name, type, desc: nil)
+        def attr_annotate(name, type, desc: nil)
           attr = Attribute.new(name.to_sym, type, desc)
 
           @builder = nil
           attributes << attr
 
-          attr_accessor attr.name
-          alias_method attr.private_getter, attr.name
-          private attr.setter, attr.private_getter
-
+          attr_writer attr.name
+          private attr.setter
 
           if type.is_a?(Union) && type.include?(Undefined)
+            alias_method attr.private_getter, attr.name
+            private attr.private_getter
+
             define_method(attr.name) do
               val = send(attr.private_getter)
 

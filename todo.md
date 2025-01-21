@@ -30,20 +30,29 @@
 * Unfolded attributes (prefix, postfix)
 * ~~Arrays inheritance~~
 * Constructor (or factory) (Proc)
-* Context -> current errors 
+* Context -> current errors
+* Test/Fix errors collection 
 * Add GDPR/Private info 
 * Add Access Rights {allow_if, allow_unless}
-* Validate Method 
+* Validate Methods? 
 * Documentation Generation
 * ~~Writing Stream~~ 
-* Annotation Style 
+* ~~Annotation Style~~ 
 * ~~[] operation to add inherit and add validators~~
 * ~~Arrays with prefix items (see JSON Schema)~~ 
 * Records with dynamic attributes (see JSON Schema)
 * Arrays - behavior with inheritance and redefinition of items?
-
-
-
+* Attr Annotation - raise exception if attr_reader not defined?
+* Attr Annotation - behavior with inheritance and redefinition?
+* Attr Annotation - multiple annotations in one function
+* Rename Values to Adt (Algebraic data types)
+* Constants 
+* Any type 
+* Inherit list from same root, make it enumerable and implement ==, eql, etc
+* Inherit all from one root (like Type or Value)
+* Replace Record Mixin with Record Type (command, event, etc. will be inherited from Record)
+* Rename Everything like Ruby native types (Object, Array, Integer, Float, ...)
+* In annotations/Unions check that operands are expected types (not native types)
 
 ## Pipes 
 
