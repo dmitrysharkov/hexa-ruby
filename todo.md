@@ -12,7 +12,7 @@
 * ~~Validators for records~~
 * ~~Pass Options To validators~~ 
 * ~~Arrays~~ 
-* When added undefined to array then skip
+* When added undefined to array then skip (?)
 * Groups
 * ~~Inheritance~~ 
 * Defaults for undefined 
@@ -23,10 +23,10 @@
 * Serialization for records
 * Pass Options to Coercing 
 * ~~Parse Primitives from String~~
-* Equality
+* ~~Equality~~ (check also == vs eql? vs ===)
 * Custom options in attributes 
 * Enum
-* Const Values 
+* Const Values (like eql constraint?) 
 * Unfolded attributes (prefix, postfix)
 * ~~Arrays inheritance~~
 * Constructor (or factory) (Proc)
@@ -35,10 +35,70 @@
 * Add Access Rights {allow_if, allow_unless}
 * Validate Method 
 * Documentation Generation
-* Reading Stream 
 * ~~Writing Stream~~ 
 * Annotation Style 
 * ~~[] operation to add inherit and add validators~~
+* ~~Arrays with prefix items (see JSON Schema)~~ 
+* Records with dynamic attributes (see JSON Schema)
+* Arrays - behavior with inheritance and redefinition of items?
+
+
+
+
+## Pipes 
+
+### Monads
+* Success - (Maybe - Typed success)
+* Failure - (Maybe - Typed failure)
+* Skip (For Grouping)
+* Wait (?)
+* Promise (?)
+
+### Connectors 
+* map
+* bind
+* tee 
+
+### Blocks
+* Transform 
+* Pair To Monad
+* Monad To Pair 
+* Select
+* Reject
+* Group
+* Select Errors
+* Reject Errors 
+* Group Errors 
+
+
+### Pipes 
+* Sequence
+* Parallel - All Of (How To Join?)
+* Parallel - One Of
+* Parallel - Any Of (How To Join?) 
+* Parallel - None Of
+* Join
+
+* Streams 
+  - CSV Input 
+  - CSV Output
+
+```ruby
+
+p1 = Hexa::Pipes::Seq.new do
+  bind Select do |val|
+    
+  end
+  
+  map do 
+    
+  end
+end
+
+```
+
+
+
 
 ### Formats 
 * From Rails Params
@@ -54,6 +114,20 @@
 * TO Excel 
 * To INI
 * From INI
+* From Yaml
+* To Yaml
+* From Avro
+* To Avro
+* From Protobuf
+* To Protobuf
+* From GraphQL
+* To GraphQL
+
+### Schema Generation
+* JSON Schema
+* GraphQL
+* Protobuf
+* Avro
 
 ### Pipes
 * Lazy Loading

@@ -24,7 +24,7 @@ end
 
 class User < Person
   attr :email, Email | Undefined, desc: 'Email'
-  attr :tags, List[Str, min_len: 3] | Undefined, desc: 'Tags'
+  attr :tags, List[Str, prefix_items: [Int], min_len: 3, uniq: true] | Undefined, desc: 'Tags'
 
   validate(:min_tags, 2) { |val, min_tags| !val.attribute_defined?(:tags) || val.tags.size >= min_tags }
 end
@@ -37,13 +37,13 @@ describe Hexa::Values::RecordMixin do
 
     it 'creates and instance from hash' do
       user = User.new(first_name: 'John', last_name: 'Doe', email: 'john@google.com',
-                      dob: '2001-01-01', tags: %w[aaa bbb ccc])
+                      dob: '2001-01-01', tags: [1] + %w[aaa bbb ccc])
 
       assert_equal 'John', user.first_name
       assert_equal 'Doe', user.last_name
       assert_equal Date.new(2001, 1, 1), user.dob
       assert_equal 'john@google.com', user.email
-      assert_equal %w[aaa bbb ccc], user.tags
+      assert_equal [1] + %w[aaa bbb ccc], user.tags
 
       assert_predicate user, :first_name_defined?
       assert_predicate user, :last_name_defined?
@@ -53,13 +53,13 @@ describe Hexa::Values::RecordMixin do
     end
 
     it 'creates and instance from array' do
-      user = User.new('John', 'Doe', '2001-01-01', 'john@google.com', %w[aaa bbb ccc])
+      user = User.new('John', 'Doe', '2001-01-01', 'john@google.com', [1] + %w[aaa bbb ccc])
 
       assert_equal 'John', user.first_name
       assert_equal 'Doe', user.last_name
       assert_equal Date.new(2001, 1, 1), user.dob
       assert_equal 'john@google.com', user.email
-      assert_equal %w[aaa bbb ccc], user.tags
+      assert_equal [1] + %w[aaa bbb ccc], user.tags
 
       assert_predicate user, :first_name_defined?
       assert_predicate user, :last_name_defined?
@@ -70,13 +70,13 @@ describe Hexa::Values::RecordMixin do
 
     it 'creates and instance from hash with str keys ' do
       user = User.new(**{ 'first_name' => 'John', 'last_name' => 'Doe', 'email' => 'john@google.com',
-                          'dob' => '2001-01-01', 'tags' => %w[aaa bbb ccc]})
+                          'dob' => '2001-01-01', 'tags' => [1] + %w[aaa bbb ccc]})
 
       assert_equal 'John', user.first_name
       assert_equal 'Doe', user.last_name
       assert_equal Date.new(2001, 1, 1), user.dob
       assert_equal 'john@google.com', user.email
-      assert_equal %w[aaa bbb ccc], user.tags
+      assert_equal [1] + %w[aaa bbb ccc], user.tags
 
       assert_predicate user, :first_name_defined?
       assert_predicate user, :last_name_defined?
@@ -99,15 +99,16 @@ describe Hexa::Values::RecordMixin do
   describe 'instance' do
     before do
       @instance = User.new(first_name: 'John', last_name: 'Doe', email: 'john@google.com',
-                           dob: '2001-01-01', tags: %w[aaa bbb ccc])
+                           dob: '2001-01-01', tags: [1] + %w[aaa bbb ccc])
     end
 
     it :deconstruct do
-      assert_equal ['John', 'Doe', Date.new(2001, 1, 1), 'john@google.com', %w[aaa bbb ccc]], @instance.deconstruct
+      arr = ['John', 'Doe', Date.new(2001, 1, 1), 'john@google.com', [1] + %w[aaa bbb ccc]]
+      assert_equal arr, @instance.deconstruct
     end
 
     it :deconstruct_keys do
-      hash = { first_name: 'John', last_name: 'Doe', email: 'john@google.com', tags: %w[aaa bbb ccc] }
+      hash = { first_name: 'John', last_name: 'Doe', email: 'john@google.com', tags: [1] + %w[aaa bbb ccc] }
 
       assert_equal hash, @instance.deconstruct_keys(%i[first_name last_name email tags])
     end
@@ -116,13 +117,13 @@ describe Hexa::Values::RecordMixin do
   describe 'euqality' do
     before do
       @u1 = User.new(first_name: 'John', last_name: 'Doe', dob: '2001-01-01',
-                     email: 'john@google.com', tags: %w[aaa bbb ccc])
+                     email: 'john@google.com', tags: [1] + %w[aaa bbb ccc])
       @u2 = User.new(first_name: 'John', last_name: 'Doe', dob: '2001-01-01',
-                     email: 'john@google.com', tags: %w[aaa bbb ccc])
+                     email: 'john@google.com', tags: [1] + %w[aaa bbb ccc])
       @u3 = User.new(first_name: 'Jane', last_name: 'Doe', dob: '2001-01-01',
-                     email: 'jane@google.com', tags: %w[aaa bbb ccc])
+                     email: 'jane@google.com', tags: [1] + %w[aaa bbb ccc])
       @u4 = User.new(first_name: 'Jane', last_name: 'Doe', dob: '2001-01-01',
-                     email: 'jane@google.com', tags: %w[aaa bbb ddd])
+                     email: 'jane@google.com', tags: [1] + %w[aaa bbb ddd])
     end
 
     it 'checks equality' do
@@ -133,9 +134,9 @@ describe Hexa::Values::RecordMixin do
   end
 
   specify :to_json do
-    json = '{firstName:"John",lastName:"Doe",dob:"2001-01-01",email:"john@google.com",tags:["aaa","bbb","ccc"]}'
+    json = '{firstName:"John",lastName:"Doe",dob:"2001-01-01",email:"john@google.com",tags:[1,"aaa","bbb","ccc"]}'
     user = User.new(first_name: 'John', last_name: 'Doe', dob: '2001-01-01',
-                    email: 'john@google.com', tags: %w[aaa bbb ccc])
+                    email: 'john@google.com', tags: [1] + %w[aaa bbb ccc])
 
     assert_equal json, user.to_json
   end

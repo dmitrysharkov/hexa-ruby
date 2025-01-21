@@ -4,10 +4,18 @@ module Hexa
   module Values
     class List < ::Array
       class << self
-        attr_reader :item_type
+        def annotate_items(type)
+          @items = type
+        end
 
-        def item(type)
-          @item_type = type
+        attr_reader :items
+
+        def annotate_prefix_items(*types)
+          types.each { |t| prefix_items << t }
+        end
+
+        def prefix_items
+          @prefix_items ||= []
         end
 
         def |(other)
@@ -25,8 +33,26 @@ module Hexa
           errors_before = context.errors.size
 
           arr = new
-          source.each.with_index do |src, idx|
-            context.push(idx) { arr << item_type.construct(src, context).first }
+          cnt = 0
+          source.each do |src|
+            context.push(cnt) do
+              arr << if cnt < prefix_items.size
+                       prefix_items[cnt].construct(src, context).first
+                     else
+                       if items
+                         items.construct(src, context).first
+                       else
+                         context.error(:unexpected_item)
+                         nil
+                       end
+                     end
+            end
+            cnt += 1
+          end
+
+          while cnt < prefix_items.size
+            context.push(cnt) { context.error(:missed_item) }
+            cnt += 1
           end
 
           if context.errors.size == errors_before
@@ -38,13 +64,18 @@ module Hexa
 
         def inherited(subclass)
           super
-          subclass.item(item_type)
+          subclass.annotate_items(items)
           subclass.invariants.inherit(invariants)
+          subclass.annotate_prefix_items(*prefix_items)
         end
 
-        def [](item_type, **validators)
+        def [](items = nil, prefix_items: [], **validators)
           Class.new(List) do
-            item(item_type)
+            annotate_items(items)
+
+            prefix_items = [prefix_items] unless prefix_items.is_a?(Array)
+            annotate_prefix_items(*prefix_items)
+
             validators.each do |predicate, params|
               if params.is_a?(TrueClass)
                 validate(predicate)
@@ -61,6 +92,7 @@ module Hexa
       invariant(:max_len, ::Integer) { |val, max_len| val.size <= max_len }
       invariant(:min_len, ::Integer) { |val, min_len| val.size >= min_len }
       invariant(:len_eq, ::Integer) { |val, len| val.size == len }
+      invariant(:uniq) { |val| val.size == val.uniq.size }
     end
   end
 end

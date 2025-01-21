@@ -37,13 +37,17 @@ module Hexa
       def write_array(data)
         out('[')
         first = true
-        data.each.with_index do |val|
+        data.each.with_index do |val, idx|
           next if val.is_a?(Values::Undefined)
 
           out(',') unless first
           first = false
 
-          write(val, data.class.item_type)
+          if idx < data.class.prefix_items.size
+            write(val, data.class.prefix_items[idx])
+          else
+            write(val, data.class.items)
+          end
         end
         out(']')
       end
