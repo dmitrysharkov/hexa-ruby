@@ -38,13 +38,11 @@ module Hexa
             context.push(cnt) do
               arr << if cnt < prefix_items.size
                        prefix_items[cnt].construct(src, context).first
+                     elsif items
+                       items.construct(src, context).first
                      else
-                       if items
-                         items.construct(src, context).first
-                       else
-                         context.error(:unexpected_item)
-                         nil
-                       end
+                       context.error(:unexpected_item)
+                       nil
                      end
             end
             cnt += 1
