@@ -53,6 +53,9 @@
 * Replace Record Mixin with Record Type (command, event, etc. will be inherited from Record)
 * Rename Everything like Ruby native types (Object, Array, Integer, Float, ...)
 * In annotations/Unions check that operands are expected types (not native types)
+* Cortage as a mix of Array and Record  
+* Tuple as Array with fixed items only 
+* Pretty Print 
 
 ## Pipes 
 
@@ -66,7 +69,7 @@
 ### Connectors 
 * map
 * bind
-* tee 
+* tee
 
 ### Blocks
 * Transform 
@@ -91,6 +94,11 @@
 * Streams 
   - CSV Input 
   - CSV Output
+  - JSON Input 
+  - JSON Output 
+  - YAML Input
+  - YAML Output 
+  - ... and so on 
 
 ```ruby
 
@@ -152,22 +160,52 @@ end
 * SQL Schema Generation For Entities
 * GDPR/Private Info 
 
-### Events 
+### Events
 * SQL Event Store
 * Kafka Event Store
 
+### Projections
+
+
+### Messages
+* UUID 
+* Timestamps
+  - Created At
+  - Received At
+  - Start Processing At
+  - End Processing At 
+* Sender 
+  - IP 
+  - UUID 
+  - Email?
+  - login_name?
+  - JWT?
+* Some other debug info (?)
+
 ### Commands 
-* Command Options (including validators)
-* Projections 
-* Command Pipelines 
+* Inherit From Message
+* Command Options(Rules) (including validators)
+* Command Decider Types
+* Command Handlers/Pipelines
+* Command Tools are Handlers Parameters
 * Documentation Generation 
 
+### Tools
+* Intialization/Bootstapping
+* Live Reload (?)
+  * for instance we have received a message that fee table was updted 
+  * then fee table has to be reloaded 
+  * or entire service has to be reloaded (stop the world event)
+
 ### Queries 
+* Inherit From Message
 * Params 
 * Response 
 * Documentation Generation
 
-### Application Services 
+### Application Services/Use Cases (Command + Query)
+* Service Pipelines 
+* Documentation Generation 
  
 ### Application Adapters  
 * OpenAPI / Schemas 
@@ -206,6 +244,108 @@ end
 * ReBAC
 * RBAC
 * ABAC
+
+```ruby
+
+CreateFeeDecider = Record[command: CreateFee, model: Model, events: List[Event1|Event2|Event3]]
+
+# CreateFeeHandler = CommnadHandler[CreateFeeDecider]
+#
+# handler = CreateFeeHandler.new do |command, tools:, events:|
+#   events << Event
+# end
+
+class CassFileAggregate 
+  decide CreateFeeDecider, CommandHandler.new(fee_table: FeeTable.new)
+  decice CreateFeeDecider, CreateFee.new()
+  decide CreateFeeDecider, CreateFeeNext.new 
+  
+  evolve 
+end
+
+class CreateFaceFileHandler < Hexa::Pipe
+  input CreateFeeDecider
+  
+  map :main_claim_created
+  map :create_side_claims
+  map :creaat_payments
+  map :create_bounces 
+  
+  def main_claim_created(command:, **)
+    # events << NewUserEvent.new(bla,bla,bla)
+    CreateFeeDecider.new(command, model, tools, events + [MainClaimWasCreated.new(command.params.main_claim)])
+  end
+  
+  def create_side_claims
+    
+  end
+end
+
+class CreateCasseFileToos < Hexa::Record 
+  attr_reader :fee_table 
+  
+  attr_annotate :fee_table, FeeTable 
+end
+
+# Decider Pipe is a Short Cut
+class CreateFaceFileHandler < Hexa::DeciderPipe
+  tools CreateCaseFileTools
+  
+  input CreateFeeDecider
+
+  event_map :main_claim_created
+  event_map :create_side_claims
+  event_map :creaat_payments
+  event_map :create_bounces
+
+  def main_claim_created(command:, **)
+    # events << NewUserEvent.new(bla,bla,bla)
+    return unless command.params.attribute_defined? :main_claim
+     
+    event MainClaimWasCreated, command.params.main_claim
+  end
+
+  def create_side_claims
+
+  end
+  
+
+end
+
+# another short cut example 
+
+
+class CreateFaceFileHandler < Hexa::DeciderPipe[CreateFeeDecider, CreateCaseFileTools]
+  event_map MainClaimWasCreated
+  event_map List[SideClaimWasCreated]
+  event_map List[CreditorPaymentWasCreated]
+  event_map List[CreditorPaymentBounceCreated]
+
+  def main_claim_created(command:, **)
+    # events << NewUserEvent.new(bla,bla,bla)
+    return unless command.params.attribute_defined? :main_claim
+
+    event command.params.main_claim
+  end
+
+  def side_claims_was_created(command:, **)
+    return unless command.params.attribute_defined? :side_claims
+    
+    events command.side_claims
+  end
+
+
+end
+
+
+
+```
+
+## Testing 
+
+* asser pipeline => all methods are correct
+
+
 
 
 
