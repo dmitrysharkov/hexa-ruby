@@ -109,6 +109,9 @@
 * [x] if binding output defers form its input then it has to declared it (out: ....) 
 * [x] last binging output has to match pipe output 
 * Binding functions might be tested outside the pipe just like normal methods(!!!)
+* Type Validations for ADT (including primitives?, Array)
+* Bypass Primitives and Array like instances and pass to payload as natives
+  (To avoid validations during the loop)
 
 ### Monads
 * [x] __Success(result)__ - (Maybe - Typed success)
