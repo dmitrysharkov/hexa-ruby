@@ -19,10 +19,10 @@ module Hexa
           attr_writer attr.name
           private attr.setter
 
-          if type.is_a?(Union) && type.include?(Undefined)
-            alias_method attr.private_getter, attr.name
-            private attr.private_getter
+          alias_method attr.private_getter, attr.name
+          private attr.private_getter
 
+          if type.is_a?(Union) && type.include?(Undefined)
             define_method(attr.name) do
               val = send(attr.private_getter)
 
