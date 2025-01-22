@@ -105,31 +105,31 @@
 ## Pipes 
 
 * receive dependencies in constructors 
-* declares input and output _payload_ type 
-* if binding output defers form its input then it has to declared it (out: ....) 
-* last binging output has to match pipe output 
+* [x] declares input and output _payload_ type 
+* [x] if binding output defers form its input then it has to declared it (out: ....) 
+* [x] last binging output has to match pipe output 
 * Binding functions might be tested outside the pipe just like normal methods(!!!)
 
 ### Monads
-* __Success(result)__ - (Maybe - Typed success)
-* __Failure(error)__ - (Maybe - Typed failure)
-* __Skip:__ (For filters, Buffers)
+* [x] __Success(result)__ - (Maybe - Typed success)
+* [x] __Failure(error)__ - (Maybe - Typed failure)
+* [x] __Skip:__ (For filters, Buffers)
 * __Promise:__ Async execution. This can be used to construct SAGAs (!!!)
 * __Wait:__ Special type of a Promise when we are waiting for an event 
 
 ### Bindings DSL   
-* map
-* bind
+* [x] map
+* [x] bind
 * tee
 * connect - use another pipe 
 * ...
 
 ### Bindings 
-* __Binder__: Expects a function to return a monad 
-* __Mapper__: Converts function _output_ to Success(output)
+* [x] __Binder__: Expects a function to return a monad 
+* [x] __Mapper__: Converts function _output_ to Success(output)
 * __Pair To Monad:__ converts [result, nil] => Success(result) and [nil, Error] => Failure(error)
 * __Monad To Pair:__ converts Success(result) => [result, nil] and Failure(error) => [nil, error]  
-* __Filter:__ returns Skip is the filter predicate is false 
+* [x] __Filter:__ returns Skip is the filter predicate is false 
 * __Buffer:__ returns Skip until the buffer is full 
 * __Flip:__ Converts Falure(error) => Success(Error) to results and Success(result) => Skip().
             This can be useful to show errors list while parsing a file for instance. 
@@ -137,7 +137,7 @@
 
 
 ### Pipes 
-* Sequence => Output type matches the last step output type 
+* [x] Sequence => Output type matches the last step output type 
 * AllOf => Output is a fixed length array (tuple)
 * OneOf => Output is Union
 * AnyOf => Output is a tuple where some places can be skipped (Undefined)
@@ -154,6 +154,7 @@
 * This is another way to implement workflows (but much more clean and using a general approach) (!!!) 
 * QUESTION: is it really necessarily to parallelize AllOf, OneOf, AnyOf in the case of Promise returned
   or just execute then consequently, which makes things much easer? It might me several 2 options             
+* Versioning/Migration         
 
 ### Input Streams 
   - CSV Input 
@@ -172,7 +173,7 @@
 ```ruby
 
 class MyPipe < Hexa::Pipes::Sequence
-  payload String 
+  input String 
   
   bind :hello
   map :bye 
