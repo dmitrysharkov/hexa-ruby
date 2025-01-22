@@ -51,6 +51,7 @@
 * [x] Arrays with prefix items (see JSON Schema)
 * Arrays - behavior with inheritance and redefinition of items?
 * Inherit list from same root, make it enumerable and implement ==, eql, etc
+* use sintax shugar ```List[[A,B,C], D]``` istead of ``` List[D, prefix_items: [A,B,C]]```
 
 
 ### Validation 
@@ -112,6 +113,8 @@
 * Type Validations for ADT (including primitives?, Array)
 * Bypass Primitives and Array like instances and pass to payload as natives
   (To avoid validations during the loop)
+* Replace default input from nil to any?
+* Use ADT for type validation. 
 
 ### Monads
 * [x] __Success(result)__ - (Maybe - Typed success)
@@ -123,15 +126,17 @@
 ### Bindings DSL   
 * [x] map
 * [x] bind
-* tee
+* [x] tee
+* [x] ret
 * connect - use another pipe 
 * add resque from exceptions (at least to flat map)
+* allow define steps recursively for one_of, any_of, all_of
 
 ### Bindings 
-* [x] __Binder__: Expects a function to return a monad 
-* [x] __Mapper__: Converts function _output_ to Success(output)
-* __Pair To Monad:__ converts [result, nil] => Success(result) and [nil, Error] => Failure(error)
-* __Monad To Pair:__ converts Success(result) => [result, nil] and Failure(error) => [nil, error]  
+* [x] __Bind__: Expects a function to return a monad 
+* [x] __Map__: Converts function _output_ to Success(output)
+* [x] __Ret__:  [nil, error] => Failure, [any,nil] => Success(any)
+* [x] __Tee__: side effects
 * [x] __Filter:__ returns Skip is the filter predicate is false 
 * __Buffer:__ returns Skip until the buffer is full 
 * __Connector__: Connects another pipe. (Factory method will be provided to bypass dependencies)

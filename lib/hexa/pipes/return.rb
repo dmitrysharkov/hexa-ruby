@@ -2,7 +2,7 @@
 
 module Hexa
   module Pipes
-    class Ret < Pipe
+    class Return < Pipe
 
       def proceed(monad)
         val, err = fn.call(monad.result)

@@ -42,6 +42,10 @@ module Hexa
           pipe(Tee, method_name, &block)
         end
 
+        def ret(method_name = nil, output: nil, &block)
+          pipe(Return, method_name, output: output, &block)
+        end
+
         def inherited(subclass)
           super
           pipes.each { |pipe| subclass.pipes << pipe }
