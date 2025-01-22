@@ -1,34 +1,35 @@
-## Principles
+## General Principles
 
 * It has to be only one way to define something 
 * Automatic documentation generation 
+* Strict typing 
+* Fail Fast 
+* TDD/Test first development 
+* Pure functions only (reference transparency principle)
 
+## Algebraic Data Types  
 
-## Parts 
-
-### Values 
-* ~~Validators for primitive types~~
-* ~~Validators for arrays~~
-* ~~Validators for records~~
-* ~~Pass Options To validators~~ 
-* ~~Arrays~~ 
+* [x] Validators for primitive types
+* [x] Validators for arrays 
+* [x] Validators for records
+* [x] Pass Options To validators 
+* [x] Arrays(Lists) 
 * When added undefined to array then skip (?)
 * Groups
-* ~~Inheritance~~ 
+* [x] Inheritance 
 * Defaults for undefined 
 * Better error messages for type mismatch 
-* ~~Coercing~~ 
-* ~~Serialization~~
+* [x] Coercing
 * Coercing for records 
 * Serialization for records
 * Pass Options to Coercing 
-* ~~Parse Primitives from String~~
-* ~~Equality~~ (check also == vs eql? vs ===)
+* [x] Parse Primitives from String
+* [x] Equality (check also == vs eql? vs ===)
 * Custom options in attributes 
 * Enum
 * Const Values (like eql constraint?) 
 * Unfolded attributes (prefix, postfix)
-* ~~Arrays inheritance~~
+* [x] Arrays(Lists) inheritance
 * Constructor (or factory) (Proc)
 * Context -> current errors
 * Test/Fix errors collection 
@@ -36,10 +37,9 @@
 * Add Access Rights {allow_if, allow_unless}
 * Validate Methods? 
 * Documentation Generation
-* ~~Writing Stream~~ 
-* ~~Annotation Style~~ 
-* ~~[] operation to add inherit and add validators~~
-* ~~Arrays with prefix items (see JSON Schema)~~ 
+* [x] Annotation Style 
+* [x] [] operation to add inherit and add validators
+* [x] Arrays with prefix items (see JSON Schema) 
 * Records with dynamic attributes (see JSON Schema)
 * Arrays - behavior with inheritance and redefinition of items?
 * Attr Annotation - raise exception if attr_reader not defined?
@@ -53,82 +53,20 @@
 * Replace Record Mixin with Record Type (command, event, etc. will be inherited from Record)
 * Rename Everything like Ruby native types (Object, Array, Integer, Float, ...)
 * In annotations/Unions check that operands are expected types (not native types)
-* Cortege as a mix of Array and Record  
-* Tuple as Array with fixed items only 
 * Pretty Print 
 
-## Pipes 
-
-### Monads
-* Success - (Maybe - Typed success)
-* Failure - (Maybe - Typed failure)
-* Skip (For Grouping)
-* Wait (?)
-* Promise (?)
-
-### Connectors 
-* map
-* bind
-* tee
-
-### Blocks
-* Transform 
-* Pair To Monad
-* Monad To Pair 
-* Select
-* Reject
-* Group
-* Select Errors
-* Reject Errors 
-* Group Errors 
-
-
-### Pipes 
-* Sequence
-* Parallel - All Of (How To Join?)
-* Parallel - One Of
-* Parallel - Any Of (How To Join?) 
-* Parallel - None Of
-* Join
-
-* Streams 
-  - CSV Input 
-  - CSV Output
-  - JSON Input 
-  - JSON Output 
-  - YAML Input
-  - YAML Output 
-  - ... and so on 
-
-```ruby
-
-p1 = Hexa::Pipes::Seq.new do
-  bind Select do |val|
-    
-  end
-  
-  map do 
-    
-  end
-end
-
-```
-
-
-
-
-### Formats 
+### Serialization
 * From Rails Params
-* From JSON 
-* ~~TO JOSN~~ 
-* To JSON with writing stream 
-* To JSON with reading stream 
+* From JSON
+* [x] TO JOSN
+* To JSON with writing stream
+* To JSON with reading stream
 * From CSV
 * TO CSV
 * From XML (not now)
 * TO XML
 * From Excel
-* TO Excel 
+* TO Excel
 * To INI
 * From INI
 * From Yaml
@@ -146,26 +84,118 @@ end
 * Protobuf
 * Avro
 
-### Pipes
-* Lazy Loading
-* Piping
+## Pipes 
 
+* receive dependencies in constructors 
+* declares input and output _payload_ type 
+* if binding output defers form its input then it has to declared it (out: ....) 
+* last binging output has to match pipe output 
+* Binding functions might be tested outside the pipe just like normal methods(!!!)
+
+### Monads
+* __Success(result)__ - (Maybe - Typed success)
+* __Failure(error)__ - (Maybe - Typed failure)
+* __Skip:__ (For filters, Buffers)
+* __Promise:__ Async execution. This can be used to construct SAGAs (!!!)
+* __Wait:__ Special type of a Promise when we are waiting for an event 
+
+### Bindings DSL   
+* map
+* bind
+* tee
+* connect - use another pipe 
+* ...
+
+### Bindings 
+* __Binder__: Expects a function to return a monad 
+* __Mapper__: Converts function _output_ to Success(output)
+* __Pair To Monad:__ converts [result, nil] => Success(result) and [nil, Error] => Failure(error)
+* __Monad To Pair:__ converts Success(result) => [result, nil] and Failure(error) => [nil, error]  
+* __Filter:__ returns Skip is the filter predicate is false 
+* __Buffer:__ returns Skip until the buffer is full 
+* __Flip:__ Converts Falure(error) => Success(Error) to results and Success(result) => Skip().
+            This can be useful to show errors list while parsing a file for instance. 
+* __Connector__: Connects another pipe. (Factory method will be provided to bypass dependencies)
+
+
+### Pipes 
+* Sequence => Output type matches the last step output type 
+* AllOf => Output is a fixed length array (tuple)
+* OneOf => Output is Union
+* AnyOf => Output is a tuple where some places can be skipped (Undefined)
+* NoneOf (?)
+
+* QUESTION: how to treat Failure/Skip monads? (Propagate failure? Propagate Skip?)
+* QUESTION: How to manage buffer in parallel? (Especially All Of)
+* NOTE: transformation from Array(List / Tuple) is a just a mapper  
+
+### Async Execution 
+* Every step is atomic 
+* State: current __payload__ + Next Step Number 
+* State can be saved/restored 
+* This is another way to implement workflows (but much more clean and using a general approach) (!!!) 
+* QUESTION: is it really necessarily to parallelize AllOf, OneOf, AnyOf in the case of Promise returned
+  or just execute then consequently, which makes things much easer? It might me several 2 options             
+
+### Input Streams 
+  - CSV Input 
+  - CSV Output
+  - JSON Input 
+  - JSON Output 
+  - YAML Input
+  - YAML Output 
+  - ... and so on 
+
+### Assertion
+
+* asser pipeline => all methods are correct
+    
+### Examples
+```ruby
+
+class MyPipe < Hexa::Pipes::Sequence
+  payload String 
+  
+  bind :hello
+  map :bye 
+
+  def hello(payload)
+    Success.new("Hello, #{payload}")
+  end
+  
+  def bye(payload)
+    "Bye #{payload}"
+  end
+end
+
+```
+
+
+
+## Persistence 
 ### Entities 
+* inherited from a record 
 * ids
 * has_one
 * has_many
+
+* GDPR/Private Info
+
+### Repositories
+* SQL Repositories for Entities
+* SQL Schema Generation For Entities
 * Lazy collections in entities
 * Change Sets
-* SQL Repositories for Entities 
-* SQL Schema Generation For Entities
-* GDPR/Private Info 
 
-### Events
+
+### Event Stores 
 * SQL Event Store
 * Kafka Event Store
 
 ### Projections
-
+* TBD
+       
+## Domain/CQRS
 
 ### Messages
 * UUID 
@@ -187,21 +217,87 @@ end
 * Command Options(Rules) (including validators)
 * Command Decider Types
 * Command Handlers/Pipelines
-* Command Tools are Handlers Parameters
+* Command Tools (Dependencies) are Handlers Parameters and will be passed to constructor  
 * Documentation Generation 
-
-### Tools
-* Intialization/Bootstapping
-* Live Reload (?)
-  * for instance we have received a message that fee table was updted 
-  * then fee table has to be reloaded 
-  * or entire service has to be reloaded (stop the world event)
 
 ### Queries 
 * Inherit From Message
 * Params 
 * Response 
 * Documentation Generation
+
+### Sagas/Orchestration/Choreography
+* Can be implemented as Pipes with Promises (!!!)
+
+### Examples 
+```ruby
+
+class CreateCaseFileDecider < Hexa::Domain::Decider
+  attr_reader :command, :fees_table 
+  
+  attr_annotate :command, CreateCaseFile
+end
+
+class CreateFaceFileHandler < Hexa::Domain::CommandHandler
+  input CreateCaseFileDecider
+  
+  decide :main_claim_was_created 
+  decide :side_claims_was_created
+  decide :creditor_payment_was_created 
+  decide :creditor_bounce_was_created
+
+  def main_claim_created(command:, events:)
+    return unless command.params.attribute_defined? :main_claim
+
+    events << MainClaimWasCreated.new(main_claim: command.params.main_claim)
+  end
+
+  def side_claims_was_created(command:, events:)
+    return unless command.params.attribute_defined? :side_claims
+
+    command.params.side_claims.each do |sc|
+      events << SideClaimWasCreated.new(side_claim: sc)
+    end
+  end
+  
+  def creditor_payment_was_created(command:, events:)
+    # ....
+  end
+  
+  def creditor_bounce_was_created(command:, events:)
+    # ...
+  end
+end
+
+class CreateCollectionFeeDecider < Hexa::Domain::Decider
+  attr_reader :command, :case_file, :fees_table
+  
+  # command is always a first parameter
+  attr_annotate :command, CreateCollectionFee
+  
+  # write models required to execute the command. each write model is an entity 
+  attr_annotate :case_file, CaseFile 
+  attr_annotate :fees_table, FeesTable
+end
+
+class CreateCollectionFeeHandler < Hexa::Domain::CommandHandler
+  input CreateCaseFileDecider
+  
+  decide :collection_fee_was_created 
+  
+  def collection_fee_was_created(command:, fees_table:, events:)
+    command.params
+  end
+end
+```
+
+
+## Access Control
+* ReBAC?
+* RBAC?
+* ABAC?
+
+## Application 
 
 ### Application Services/Use Cases (Command + Query)
 * Service Pipelines 
@@ -240,110 +336,8 @@ end
 * SQS
 * Kafka 
 
-### Access Control 
-* ReBAC
-* RBAC
-* ABAC
-
-```ruby
-
-CreateFeeDecider = Record[command: CreateFee, model: Model, events: List[Event1|Event2|Event3]]
-
-# CreateFeeHandler = CommnadHandler[CreateFeeDecider]
-#
-# handler = CreateFeeHandler.new do |command, tools:, events:|
-#   events << Event
-# end
-
-class CassFileAggregate 
-  decide CreateFeeDecider, CommandHandler.new(fee_table: FeeTable.new)
-  decice CreateFeeDecider, CreateFee.new()
-  decide CreateFeeDecider, CreateFeeNext.new 
-  
-  evolve 
-end
-
-class CreateFaceFileHandler < Hexa::Pipe
-  input CreateFeeDecider
-  
-  map :main_claim_created
-  map :create_side_claims
-  map :creaat_payments
-  map :create_bounces 
-  
-  def main_claim_created(command:, **)
-    # events << NewUserEvent.new(bla,bla,bla)
-    CreateFeeDecider.new(command, model, tools, events + [MainClaimWasCreated.new(command.params.main_claim)])
-  end
-  
-  def create_side_claims
-    
-  end
-end
-
-class CreateCasseFileToos < Hexa::Record 
-  attr_reader :fee_table 
-  
-  attr_annotate :fee_table, FeeTable 
-end
-
-# Decider Pipe is a Short Cut
-class CreateFaceFileHandler < Hexa::DeciderPipe
-  tools CreateCaseFileTools
-  
-  input CreateFeeDecider
-
-  event_map :main_claim_created
-  event_map :create_side_claims
-  event_map :creaat_payments
-  event_map :create_bounces
-
-  def main_claim_created(command:, **)
-    # events << NewUserEvent.new(bla,bla,bla)
-    return unless command.params.attribute_defined? :main_claim
-     
-    event MainClaimWasCreated, command.params.main_claim
-  end
-
-  def create_side_claims
-
-  end
-  
-
-end
-
-# another short cut example 
 
 
-class CreateFaceFileHandler < Hexa::DeciderPipe[CreateFeeDecider, CreateCaseFileTools]
-  event_map MainClaimWasCreated
-  event_map List[SideClaimWasCreated]
-  event_map List[CreditorPaymentWasCreated]
-  event_map List[CreditorPaymentBounceCreated]
-
-  def main_claim_created(command:, **)
-    # events << NewUserEvent.new(bla,bla,bla)
-    return unless command.params.attribute_defined? :main_claim
-
-    event command.params.main_claim
-  end
-
-  def side_claims_was_created(command:, **)
-    return unless command.params.attribute_defined? :side_claims
-    
-    events command.side_claims
-  end
-
-
-end
-
-
-
-```
-
-## Testing 
-
-* asser pipeline => all methods are correct
 
 
 
