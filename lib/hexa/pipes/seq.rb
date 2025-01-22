@@ -1,14 +1,31 @@
+# frozen_string_literal: true
+
 module Hexa
   module Pipes
     class Seq < Pipeline
-      def perform(monad)
-        self.class.pipes.each do |pipe|
-          break unless monad.is_a?(Success)
+      def self.output_type
+        pipes.last.pipe_class.output_type
+      end
 
-          monad = pipe.call(self, monad.result)
+      def initialize
+        super
+
+        inp = self.class.input_type
+
+        @pipes = self.class.pipes.map do |blueprint|
+          block = blueprint.method_name ? method(blueprint.method_name) : blueprint.block
+          out = blueprint.options[:out] || inp
+          options = blueprint.options.merge(inp: inp, out: out)
+          inp = out
+
+          blueprint.pipe_class.new(**options, &block)
         end
+      end
 
-        monad
+      def call(inp)
+        val = inp
+        pipes.each { |pipe| val = pipe.call(val) }
+        val
       end
     end
   end

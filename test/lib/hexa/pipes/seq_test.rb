@@ -3,7 +3,7 @@
 require_relative '_support'
 
 class TestPipeline < Hexa::Pipes::Seq
-  payload String
+  input String
 
   bind :hello
   map :bye
@@ -18,9 +18,18 @@ class TestPipeline < Hexa::Pipes::Seq
 end
 
 describe Hexa::Pipes::Seq do
-  it do
-    pipeline = TestPipeline.new
-    out = pipeline.call('John')
+  before do
+    @pipeline = TestPipeline.new
+  end
+
+  specify :call do
+    out = @pipeline.call('John')
     assert_equal 'Hello, John... Bye.', out.result
+  end
+
+  specify :to_proc do
+    result = %w[Jake Jane].map(&@pipeline).map(&:result)
+    expected = ['Hello, Jake... Bye.', 'Hello, Jane... Bye.']
+    assert_equal expected, result
   end
 end

@@ -1,17 +1,20 @@
+# frozen_string_literal: true
+
 module Hexa
   module Pipes
     class Filter < Pipe
-      def inverse
-        !!@options[:inverse]
+      attr_reader :inverse
+      def initialize(inverse: false, **kw_args, &block)
+        super(**kw_args, &block)
+        @inverse = inverse
       end
 
-      def call(pipeline, payload)
-        result = super
-
-        if result
-          inverse ? Skip.new : Success.new(payload)
+      def proceed(success)
+        flag = fn.call(success.result)
+        if flag
+          inverse ? Skip.new : success
         else
-          inverse ? Success.new(payload) : Skip.new
+          inverse ? success : Skip.new
         end
       end
     end
