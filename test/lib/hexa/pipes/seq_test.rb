@@ -3,25 +3,30 @@
 require_relative '_support'
 
 describe Hexa::Pipes::Seq do
-  before do
-    @pipeline = TestPipeline.new
-  end
-
   specify :call do
-    out = @pipeline.call('John')
+    pipeline = TestPipeline.new
+    out = pipeline.call('John')
+
     assert_equal 'Hello, John... Bye.', out.result
+    assert_equal 1, pipeline.counter
   end
 
   specify :to_proc do
-    result = %w[Jake Jane].map(&@pipeline).map(&:result)
+    pipeline = TestPipeline.new
+    result = %w[Jake Jane].map(&pipeline).map(&:result)
     expected = ['Hello, Jake... Bye.', 'Hello, Jane... Bye.']
+
     assert_equal expected, result
+    assert_equal 2, pipeline.counter
   end
 
   specify :filter do
+    pipeline = TestPipeline.new
     filter = Hexa::Pipes::Filter.new { |val| val.include?('Jane') }
-    result = %w[Jake Jane].map(&@pipeline).map(&filter).select(&Hexa::Pipes::Success).map(&:result)
+    result = %w[Jake Jane].map(&pipeline).map(&filter).select(&Hexa::Pipes::Success).map(&:result)
     expected = ['Hello, Jane... Bye.']
+
+    assert_equal 2, pipeline.counter
     assert_equal expected, result
   end
 end

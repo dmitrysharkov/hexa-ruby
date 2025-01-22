@@ -125,7 +125,7 @@
 * [x] bind
 * tee
 * connect - use another pipe 
-* ...
+* add resque from exceptions (at least to flat map)
 
 ### Bindings 
 * [x] __Binder__: Expects a function to return a monad 
@@ -134,12 +134,10 @@
 * __Monad To Pair:__ converts Success(result) => [result, nil] and Failure(error) => [nil, error]  
 * [x] __Filter:__ returns Skip is the filter predicate is false 
 * __Buffer:__ returns Skip until the buffer is full 
-* __Flip:__ Converts Falure(error) => Success(Error) to results and Success(result) => Skip().
-            This can be useful to show errors list while parsing a file for instance. 
 * __Connector__: Connects another pipe. (Factory method will be provided to bypass dependencies)
 
 
-### Pipes 
+### Pipelines 
 * [x] Sequence => Output type matches the last step output type 
 * AllOf => Output is a fixed length array (tuple)
 * OneOf => Output is Union

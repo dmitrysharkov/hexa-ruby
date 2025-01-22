@@ -38,6 +38,10 @@ module Hexa
           pipe(Filter, method_name, output: output, inverse: true, &block)
         end
 
+        def tee(method_name = nil, &block)
+          pipe(Tee, method_name, &block)
+        end
+
         def inherited(subclass)
           super
           pipes.each { |pipe| subclass.pipes << pipe }
