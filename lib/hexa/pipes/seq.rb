@@ -14,8 +14,8 @@ module Hexa
 
         @pipes = self.class.pipes.map do |blueprint|
           block = blueprint.method_name ? method(blueprint.method_name) : blueprint.block
-          out = blueprint.options[:out] || inp
-          options = blueprint.options.merge(inp: inp, out: out)
+          out = blueprint.options[:output] || inp
+          options = blueprint.options.merge(input: inp, output: out)
           inp = out
 
           blueprint.pipe_class.new(**options, &block)

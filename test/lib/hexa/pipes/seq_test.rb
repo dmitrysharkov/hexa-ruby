@@ -2,21 +2,6 @@
 
 require_relative '_support'
 
-class TestPipeline < Hexa::Pipes::Seq
-  input String
-
-  bind :hello
-  map :bye
-
-  def hello(payload)
-    Success.new("Hello, #{payload}.")
-  end
-
-  def bye(payload)
-    "#{payload}.. Bye."
-  end
-end
-
 describe Hexa::Pipes::Seq do
   before do
     @pipeline = TestPipeline.new
@@ -30,6 +15,13 @@ describe Hexa::Pipes::Seq do
   specify :to_proc do
     result = %w[Jake Jane].map(&@pipeline).map(&:result)
     expected = ['Hello, Jake... Bye.', 'Hello, Jane... Bye.']
+    assert_equal expected, result
+  end
+
+  specify :filter do
+    filter = Hexa::Pipes::Filter.new(input: String) { |val| val.include?('Jane') }
+    result = %w[Jake Jane].map(&@pipeline).map(&filter).select(&Hexa::Pipes::Success).map(&:payload)
+    expected = ['Hello, Jane... Bye.']
     assert_equal expected, result
   end
 end

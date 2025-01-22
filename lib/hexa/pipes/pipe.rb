@@ -5,14 +5,13 @@ module Hexa
     class Pipe
       attr_reader :input_type, :output_type, :fn
 
-      def initialize(inp: nil, out: nil, payload: nil, &block)
-        raise(ArgumentError, "inp: expected #{Class}") if inp && !inp.is_a?(Class)
-        raise(ArgumentError, "out: expected #{Class}") if out && !out.is_a?(Class)
-        raise(ArgumentError, "payload: expected #{Class}") if payload && !payload.is_a?(Class)
+      def initialize(input: nil, output: nil, &block)
+        raise(ArgumentError, "inp: expected #{Class}") if input && !input.is_a?(Class)
+        raise(ArgumentError, "out: expected #{Class}") if output && !output.is_a?(Class)
         raise(ArgumentError, 'block is missed') unless block
 
-        @input_type = inp || payload
-        @output_type = out || payload
+        @input_type = input
+        @output_type = output || input
         @fn = block
       end
 

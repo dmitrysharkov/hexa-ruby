@@ -22,20 +22,20 @@ module Hexa
           pipes << PipeBlueprint.new(pipe_class, method_name, options, block)
         end
 
-        def bind(method_name = nil, out: nil, &block)
-          pipe(Bind, method_name, out: out, &block)
+        def bind(method_name = nil, output: nil, &block)
+          pipe(Bind, method_name, output: output, &block)
         end
 
-        def map(method_name = nil, out: nil, &block)
-          pipe(Map, method_name, out: out, &block)
+        def map(method_name = nil, output: nil, &block)
+          pipe(Map, method_name, output: output, &block)
         end
 
-        def select(method_name = nil, out: nil, &block)
-          pipe(Filter, method_name, out: out, &block)
+        def select(method_name = nil, output: nil, &block)
+          pipe(Filter, method_name, output: output, &block)
         end
 
-        def reject(method_name = nil, out: nil, &block)
-          pipe(Filter, method_name, out: out, inverse: true, &block)
+        def reject(method_name = nil, output: nil, &block)
+          pipe(Filter, method_name, output: output, inverse: true, &block)
         end
 
         def inherited(subclass)
