@@ -61,6 +61,9 @@ describe Hexa::Adt::RecordMixin do
     it 'creates with undefined values' do
       user = User.new('John', 'Doe')
 
+      assert_equal 'John', user.first_name
+      assert_equal 'Doe', user.last_name
+
       assert_predicate user, :first_name_defined?
       assert_predicate user, :last_name_defined?
       refute_predicate user, :dob_defined?
