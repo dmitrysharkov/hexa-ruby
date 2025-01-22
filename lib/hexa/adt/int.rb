@@ -5,7 +5,7 @@ module Hexa
     class Int < Scalar
       self.base_class = ::Integer
 
-      coerce String do |val|
+      coerce ::String do |val|
         [Integer(val), true]
       rescue ArgumentError
         [nil, false]

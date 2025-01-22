@@ -24,7 +24,7 @@ module Hexa
         elsif source.respond_to?(:deconstruct)
           build_from_array(object, source, context)
         else
-          raise(ArgumentError, "#{Array} or #{Hash} expected")
+          raise(ArgumentError, "#{::Array} or #{::Hash} expected")
         end
       end
 

@@ -88,7 +88,7 @@ module Hexa
         def [](**validators)
           Class.new(self) do
             validators.each do |predicate, params|
-              if params.is_a?(TrueClass)
+              if params.is_a?(::TrueClass)
                 validate(predicate)
               else
                 validate(predicate, *params)

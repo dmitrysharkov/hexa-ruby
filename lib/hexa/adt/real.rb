@@ -5,13 +5,13 @@ module Hexa
     class Real < Scalar
       self.base_class = ::Float
 
-      coerce String do |val|
+      coerce ::String do |val|
         [Float(val), true]
       rescue ArgumentError
         [nil, false]
       end
 
-      coerce Integer, &:to_f
+      coerce ::Integer, &:to_f
 
       invariant(:gt, ::Numeric) { |val, base| val > base }
       invariant(:gteq, ::Numeric) { |val, base| val >= base }

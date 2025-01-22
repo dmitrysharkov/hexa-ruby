@@ -5,7 +5,7 @@ module Hexa
     class Null < Scalar
       self.base_class = NilClass
 
-      coerce String do |val|
+      coerce ::String do |val|
         if val == 'null' || val.empty?
           [nil, true]
         else

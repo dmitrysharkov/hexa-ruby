@@ -41,7 +41,7 @@ module Hexa
 
       def value_type(val)
         @types.detect do |t|
-          val.is_a?(t) || (t < Scalar && val.is_a?(t.base_class)) || t < List && val.is_a?(Array)
+          val.is_a?(t) || (t < Scalar && val.is_a?(t.base_class)) || t < List && val.is_a?(::Array)
         end
       end
     end

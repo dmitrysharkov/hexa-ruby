@@ -1,6 +1,6 @@
 module Hexa
   module Adt
-    class Dt < Scalar
+    class Date < Scalar
       self.base_class = ::Date
 
       invariant(:gt, ::Date) { |val, base| val > base }
@@ -8,15 +8,13 @@ module Hexa
       invariant(:lt, ::Date) { |val, base| val < base }
       invariant(:lteq, ::Date) { |val, base| val <= base }
 
-      coerce String do |val|
-        [Date.parse(val), true]
-      rescue Date::Error
+      coerce ::String do |val|
+        [::Date.parse(val), true]
+      rescue ::Date::Error
         [nil, false]
       end
 
-      serialize_as String do |val|
-        val.to_s
-      end
+      serialize_as(::String, &:to_s)
     end
   end
 end

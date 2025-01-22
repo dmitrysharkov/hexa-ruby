@@ -50,7 +50,7 @@ module Hexa
 
       def add_validator(name, params, call_stack, func)
         fn = func || prepare_fn(name, params, call_stack)
-        params = [params] unless params.is_a?(Array)
+        params = [params] unless params.is_a?(::Array)
 
         require_options = fn.parameters.last == %i[keyreq options]
 

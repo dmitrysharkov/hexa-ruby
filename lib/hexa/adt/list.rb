@@ -71,11 +71,11 @@ module Hexa
           Class.new(List) do
             items_annotate(items)
 
-            prefix_items = [prefix_items] unless prefix_items.is_a?(Array)
+            prefix_items = [prefix_items] unless prefix_items.is_a?(::Array)
             prefix_items_annotate(*prefix_items)
 
             validators.each do |predicate, params|
-              if params.is_a?(TrueClass)
+              if params.is_a?(::TrueClass)
                 validate(predicate)
               else
                 validate(predicate, *params)

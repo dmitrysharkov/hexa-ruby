@@ -3,12 +3,12 @@
 module Hexa
   module Adt
     class Bool < Scalar
-      self.base_class = TrueClass
+      self.base_class = ::TrueClass
 
       TRUE_STRINGS = %w[ture yes].freeze
       FALSE_STRINGS = %w[false no].freeze
 
-      coerce String do |val|
+      coerce ::String do |val|
         val = val.downcase
 
         if TRUE_STRINGS.include?(val)
@@ -20,7 +20,7 @@ module Hexa
         end
       end
 
-      coerce Integer do |val|
+      coerce ::Integer do |val|
         case val
         when 0 then [false, true]
         when 1 then [true, true]
@@ -28,7 +28,7 @@ module Hexa
         end
       end
 
-      coerce FalseClass do |val|
+      coerce ::FalseClass do |val|
         val
       end
     end

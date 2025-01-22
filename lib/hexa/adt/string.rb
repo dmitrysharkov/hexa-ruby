@@ -2,7 +2,7 @@
 
 module Hexa
   module Adt
-    class Str < Scalar
+    class String < Scalar
       self.base_class = ::String
 
       invariant(:pattern, ::Regexp) { |val, re| re =~ val }

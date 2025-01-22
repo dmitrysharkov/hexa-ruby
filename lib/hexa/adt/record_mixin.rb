@@ -58,17 +58,10 @@ module Hexa
         # rubocop:disable Metrics/CyclomaticComplexity,Metrics/MethodLength
         def const_missing(name)
           case name
-          when :Str then Adt::Str
-          when :Bool then Adt::Bool
-          when :Int then Adt::Int
-          when :Real then Adt::Real
-          when :List then Adt::List
-          when :Dt then Adt::Dt
           when :Null then Null
           when :Undefined then Adt::Undefined
           when :Adt then Adt
-          else
-            raise TypeError
+          else super
           end
         end
 

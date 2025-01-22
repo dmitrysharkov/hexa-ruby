@@ -4,11 +4,13 @@ require 'test_helper'
 require 'uri'
 require 'pry-byebug'
 
-# class Email < Hexa::Values::Str
-#   validate(:pattern, URI::MailTo::EMAIL_REGEXP)
-# end
-
-Email = Hexa::Adt::Str[pattern: URI::MailTo::EMAIL_REGEXP]
+Email = Hexa::Adt::String[pattern: URI::MailTo::EMAIL_REGEXP]
+FirstName = Hexa::Adt::String[]
+LastName = Hexa::Adt::String[]
+StrTag = Hexa::Adt::String[]
+IntTag = Hexa::Adt::Int[]
+Tags = Hexa::Adt::List[StrTag, prefix_items: [IntTag], min_len: 3, uniq: true]
+DateOfBirth = Hexa::Adt::Date[]
 
 class BaseRecord < Hexa::Adt::Record
   def to_json(options = {})
@@ -19,16 +21,16 @@ end
 class Person < BaseRecord
   attr_reader :first_name, :last_name, :dob
 
-  attr_annotate :first_name, Str | Null | Undefined, desc: 'First Name'
-  attr_annotate :last_name, Str | Null | Undefined, desc:  'Last Name'
-  attr_annotate :dob, Dt | Undefined, desc: 'Date of Birth'
+  attr_annotate :first_name, FirstName | Null | Undefined, desc: 'First Name'
+  attr_annotate :last_name, LastName | Null | Undefined, desc: 'Last Name'
+  attr_annotate :dob, DateOfBirth | Undefined, desc: 'Date of Birth'
 end
 
 class User < Person
   attr_reader :email, :tags
 
   attr_annotate :email, Email | Undefined, desc: 'Email'
-  attr_annotate :tags, List[Str, prefix_items: [Int], min_len: 3, uniq: true] | Undefined, desc: 'Tags'
+  attr_annotate :tags,  Tags | Undefined, desc: 'Tags'
 
   validate(:min_tags, 2) { |val, min_tags| !val.attribute_defined?(:tags) || val.tags.size >= min_tags }
 end
