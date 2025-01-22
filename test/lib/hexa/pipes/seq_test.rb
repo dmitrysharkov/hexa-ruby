@@ -19,8 +19,8 @@ describe Hexa::Pipes::Seq do
   end
 
   specify :filter do
-    filter = Hexa::Pipes::Filter.new(input: String) { |val| val.include?('Jane') }
-    result = %w[Jake Jane].map(&@pipeline).map(&filter).select(&Hexa::Pipes::Success).map(&:payload)
+    filter = Hexa::Pipes::Filter.new { |val| val.include?('Jane') }
+    result = %w[Jake Jane].map(&@pipeline).map(&filter).select(&Hexa::Pipes::Success).map(&:result)
     expected = ['Hello, Jane... Bye.']
     assert_equal expected, result
   end
