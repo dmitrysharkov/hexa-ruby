@@ -1,3 +1,5 @@
+# Hexagonal Architecture On Ruby 
+
 ## General Principles
 
 * It has to be only one way to define something 
@@ -7,53 +9,69 @@
 * TDD/Test first development 
 * Pure functions only (reference transparency principle)
 
-## Algebraic Data Types  
+## Algebraic Data Types 
 
-* [x] Validators for primitive types
-* [x] Validators for arrays 
-* [x] Validators for records
-* [x] Pass Options To validators 
-* [x] Arrays(Lists) 
-* When added undefined to array then skip (?)
-* Groups
-* [x] Inheritance 
-* Defaults for undefined 
-* Better error messages for type mismatch 
-* [x] Coercing
-* Coercing for records 
-* Serialization for records
-* Pass Options to Coercing 
-* [x] Parse Primitives from String
-* [x] Equality (check also == vs eql? vs ===)
-* Custom options in attributes 
+### General
 * Enum
 * Const Values (like eql constraint?) 
-* Unfolded attributes (prefix, postfix)
-* [x] Arrays(Lists) inheritance
 * Constructor (or factory) (Proc)
-* Context -> current errors
-* Test/Fix errors collection 
-* Add GDPR/Private info 
-* Add Access Rights {allow_if, allow_unless}
-* Validate Methods? 
 * Documentation Generation
-* [x] Annotation Style 
-* [x] [] operation to add inherit and add validators
-* [x] Arrays with prefix items (see JSON Schema) 
+* Any type 
+* Inherit all types from one root (like Type or Value)
+* Pretty Print
+
+
+### Scalars
+* [x] Coercing
+* Pass Options to Coercing
+* [x] Parse Primitives from String
+* Improve Naming (for instance: StringValue, IntegerValue, FloatValue, ...)
+
+ 
+### Records 
+* Groups (AllOf, AnyOf, OneOf)
+* [x] Inheritance
+* Defaults for undefined
+* Coercing for records
+* [x] Equality (check also == vs eql? vs ===)
+* Custom options in attributes
+* Unfolded attributes (prefix, postfix)
+* [x] Annotation Style
 * Records with dynamic attributes (see JSON Schema)
-* Arrays - behavior with inheritance and redefinition of items?
 * Attr Annotation - raise exception if attr_reader not defined?
 * Attr Annotation - behavior with inheritance and redefinition?
 * Attr Annotation - multiple annotations in one function
-* Rename Values to Adt (Algebraic data types)
-* Constants 
-* Any type 
-* Inherit list from same root, make it enumerable and implement ==, eql, etc
-* Inherit all from one root (like Type or Value)
 * Replace Record Mixin with Record Type (command, event, etc. will be inherited from Record)
-* Rename Everything like Ruby native types (Object, Array, Integer, Float, ...)
+
+
+### Arrays 
+* [x] Arrays(Lists)
+* When added undefined to array then skip (?)
+* [x] Arrays(Lists) inheritance
+* [x] Arrays with prefix items (see JSON Schema)
+* Arrays - behavior with inheritance and redefinition of items?
+* Inherit list from same root, make it enumerable and implement ==, eql, etc
+
+
+### Validation 
+* [x] Validators for primitive types
+* [x] Validators for arrays
+* [x] Validators for records
+* [x] Pass Options To validators
+* Better error messages for type mismatch
+* Context -> current errors
+* Validate Methods?
+* Test/Fix errors collection
+* [x] [] operation to add inherit and add validators
+* Validator to_proc
+
+### Unions
 * In annotations/Unions check that operands are expected types (not native types)
-* Pretty Print 
+
+### Privacy & Security 
+* Add GDPR/Private info
+* Add Access Rights {allow_if, allow_unless}
+
 
 ### Serialization
 * From Rails Params
@@ -171,14 +189,12 @@ end
 ```
 
 
-
 ## Persistence 
 ### Entities 
 * inherited from a record 
 * ids
 * has_one
 * has_many
-
 * GDPR/Private Info
 
 ### Repositories
