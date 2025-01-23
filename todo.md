@@ -72,7 +72,13 @@
 ### Privacy & Security 
 * Add GDPR/Private info
 * Add Access Rights {allow_if, allow_unless}
+* QUESTION: Take it to a separate context to not mix with business logic 
+ (at least for access control)
 
+### Mapping 
+* Deconstruct 
+* Construct 
+* Mapping rule: deconstruct + construct 
 
 ### Serialization
 * From Rails Params
@@ -103,6 +109,11 @@
 * Protobuf
 * Avro
 
+## Specifications 
+* Implementation of a [Specification Pattern](https://en.wikipedia.org/wiki/Specification_pattern)
+* Will be serializable/unserializable 
+* QUESTION: is specification is a specific version of a pipeline?
+
 ## Pipes 
 
 * receive dependencies in constructors 
@@ -115,6 +126,7 @@
   (To avoid validations during the loop)
 * Replace default input from nil to any?
 * Use ADT for type validation. 
+* Use ADT for parametrisation.
 
 ### Monads
 * [x] __Success(result)__ - (Maybe - Typed success)
@@ -128,7 +140,8 @@
 * [x] bind
 * [x] tee
 * [x] ret
-* connect - use another pipe 
+* chunk
+* conn - use another pipe 
 * add resque from exceptions (at least to flat map)
 * allow define steps recursively for one_of, any_of, all_of
 
@@ -138,9 +151,14 @@
 * [x] __Ret__:  [nil, error] => Failure, [any,nil] => Success(any)
 * [x] __Tee__: side effects
 * [x] __Filter:__ returns Skip is the filter predicate is false 
-* __Buffer:__ returns Skip until the buffer is full 
+* __Keep:__ returns Skip until the buffer is full 
 * __Connector__: Connects another pipe. (Factory method will be provided to bypass dependencies)
 
+### Macros 
+* Is a subclass of a Pipe which can implement some logic 
+* Might have ADT parameters 
+* It has to be a macro to execute commands from other application
+* If has to be a macro which maps input output (deconstruct => construct)
 
 ### Pipelines 
 * [x] Sequence => Output type matches the last step output type 
@@ -151,16 +169,30 @@
 
 * QUESTION: how to treat Failure/Skip monads? (Propagate failure? Propagate Skip?)
 * QUESTION: How to manage buffer in parallel? (Especially All Of)
-* NOTE: transformation from Array(List / Tuple) is a just a mapper  
+* NOTE: transformation from Array(List / Tuple) is a just a mapper 
+
+### Loops & Generators 
+* __Loop__ will repeat underline pipe several times (while specification is true)
+* __Generator__ is an opposite to a buffer. It receives one input and return multiple outputs
+  CSV => parser is a Generator. CSV Writer => is a buffer (!!!)
 
 ### Async Execution 
 * Every step is atomic 
 * State: current __payload__ + Next Step Number 
 * State can be saved/restored 
-* This is another way to implement workflows (but much more clean and using a general approach) (!!!) 
-* QUESTION: is it really necessarily to parallelize AllOf, OneOf, AnyOf in the case of Promise returned
-  or just execute then consequently, which makes things much easer? It might me several 2 options             
+* This is another way to implement workflows (but much more clean and using a general approach) (!!!)
+* Multithreading: wait_all, wait_one.
+* Multithreading state is an entire tree state of all substates.
+  Optimistic locking will be applied. Conflict means that 2 threads tried to execute
+  the same _promise_. Options: just ignore or suspend the execution and report an error.
+* Execution log: same principle and even sourcing (!!!). Event: "Step 124 DONE"
+* Prevent endless loops
 * Versioning/Migration         
+
+### Serialization 
+* It has to be possible to serialize and unserialize pipelines (Json etc)
+* It will be possible to build a pipeline in front end, serialize and JSON, 
+  then unserialize and execute in the Runtime
 
 ### Input Streams 
   - CSV Input 
@@ -314,11 +346,12 @@ class CreateCollectionFeeHandler < Hexa::Domain::CommandHandler
 end
 ```
 
-
 ## Access Control
-* ReBAC?
+* ReBAC? (see this [video](https://www.youtube.com/watch?v=nUKBQ06-8xk&t=2043s))
 * RBAC?
 * ABAC?
+* Access Control is a domain
+* We can use __specifications__ do define complex access control rules 
 
 ## Application 
 
@@ -353,11 +386,21 @@ end
   - generate client
 * Web Sockets 
 * Cmd
-* Console 
+* Console
+
+### Apartment
+* __In site__: means the entire application instantiated as an op
+* __Co-Host__: means executed on the same server (container) in a parallel process.
+  Communication can be done via unix sockets.
+* __Remote__: means executed on the another server.
+
 
 ### Application Event Buses
 * SQS
 * Kafka 
+
+## Communication between applications (Context Mapping)
+* See this [video](https://www.youtube.com/watch?v=v4Jt2-Vx2E4&list=PLLMAS43NKQJAnLQwk-ZduvtvYJWgDyKX5&index=4)
 
 
 
