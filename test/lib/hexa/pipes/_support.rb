@@ -21,7 +21,7 @@ class TestPipeline < Hexa::Pipes::Seq
   end
 
   def hello(payload)
-    Success.new("Hello, #{payload}.")
+    Success["Hello, #{payload}."]
   end
 
   def bye(payload)

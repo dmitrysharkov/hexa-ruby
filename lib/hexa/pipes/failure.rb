@@ -5,6 +5,10 @@ module Hexa
     class Failure < Monad
       attr_reader :error
 
+      def self.[](error)
+        new(error)
+      end
+
       def initialize(error)
         super()
         @error = error

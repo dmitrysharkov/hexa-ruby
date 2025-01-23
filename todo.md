@@ -75,10 +75,11 @@
 * QUESTION: Take it to a separate context to not mix with business logic 
  (at least for access control)
 
-### Mapping 
+### Mapping/Transformations  
 * Deconstruct 
 * Construct 
-* Mapping rule: deconstruct + construct 
+* Mapping rule: deconstruct + construct
+* For lists mappings we can use specification (see below)
 
 ### Serialization
 * From Rails Params
@@ -113,9 +114,15 @@
 * Implementation of a [Specification Pattern](https://en.wikipedia.org/wiki/Specification_pattern)
 * Will be serializable/unserializable 
 * QUESTION: is specification is a specific version of a pipeline?
+* And 
+* Or
+* Not
+* With: select sub-cluster of data 
 
 ## Pipes 
 
+
+* Read this [blog](https://fsharpforfunandprofit.com/rop/)
 * receive dependencies in constructors 
 * [x] declares input and output _payload_ type 
 * [x] if binding output defers form its input then it has to declared it (out: ....) 
