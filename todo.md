@@ -20,6 +20,29 @@
 * Inherit all types from one root (like Type or Value)
 * Pretty Print
 
+### Types 
+* ScalarType 
+* MapType 
+* RecordType 
+* ListType 
+* TupleType 
+* UndefinedType
+* ConstType 
+* AnyType 
+* EnumType 
+
+### Classes 
+* Scalar < ::Object
+* Map < ::Hash 
+* Record < ::Object
+* List < ::Amount 
+* Tuple < ::Amount 
+* Undefined < ::Object 
+* Const < ::Object
+* Any < ::Object
+* Enum < ::Object
+* Choice < ::Object
+
 
 ### Scalars
 * [x] Coercing
@@ -136,8 +159,8 @@
 * Use ADT for parametrisation.
 
 ### Monads
-* [x] __Success(result)__ - (Maybe - Typed success)
-* [x] __Failure(error)__ - (Maybe - Typed failure)
+* [x] __Success(result)__ - (Maybe - Typed success)  
+* [x] __Failure(error)__ - (Maybe - Typed failure) 
 * [x] __Skip:__ (For filters, Buffers)
 * __Promise:__ Async execution. This can be used to construct SAGAs (!!!)
 * __Wait:__ Special type of a Promise when we are waiting for an event 
@@ -409,9 +432,152 @@ end
 ## Communication between applications (Context Mapping)
 * See this [video](https://www.youtube.com/watch?v=v4Jt2-Vx2E4&list=PLLMAS43NKQJAnLQwk-ZduvtvYJWgDyKX5&index=4)
 
+      
+
+## Functional Programming 
+
+See this [presentation](https://www.slideshare.net/slideshow/domain-modeling-made-functional-devternity-2022/254826776#32)
+
+```ruby
 
 
 
+Suit = Enum['Club', 'Diamond', 'Spade', 'Heart']
+Rank = Enum[*%w[Two Three Four Five Six Seven Eight Nine Ten Jek Queen King Ace]] 
+Joker = Const['Joker']
+
+Card = (Suit * Rank) | Joker # * - creates a tuple, | creates a union 
+Hand = List[Card, min_len: 5]
+Deck = List[Card, max_len: 54]
+Player = Record[name: Str, hand: Hand]
+
+ShuffledDeck = List[Card, max_len: 54]
+Shuffle = Deck >> ShuffledDeck
+
+Deal = ShuffledDeck >> (ShuffledDeck * Card)
+PickupCard = ((Hand * Card) >> Hand)
+
+
+Option[Int] # is like Int | Nothing 
+
+# union - one of 
+# tuple - all of                    
+# Choice is a better choice of 
+
+# Do We Really need null? Null means Something is unknown.
+
+# construct method of the type will return monad! (Success or Failure)
+# Validators Has To Return Monads
+# Coercers Has To Return Monads
+
+Email = StringValue[pattern: URI::MailTo::EMAIL_REGEXP] do 
+  def domain
+    value.split('@').last 
+  end
+  
+  def name
+    value.split('@').first
+  end
+end
+VerifiedEmail = Email[] 
+
+
+x = Email.new("john@doe.com")
+x.value 
+x.to_s # now this is not a email. this is just a string 
+
+
+
+class Amount < Record  
+  attr_accessor :cents
+  attr_types cents: PositiveInt, currency: Currency
+  
+  def dollars
+    cents.value  / 100.0
+  end
+  
+  def to_s
+    "#{dollars} #{currency..to_s.upper}"
+  end
+  
+  def +()
+    
+  end
+end
+
+# default value only makes sense for (some) commands
+
+# there will be no nulls => null means value undefined 
+# key with null => no key => try to access => exception 
+# index with null => no index 
+
+# am = Amount.new(100, "USD")
+# am.cents # here i can hide it behind and return value not type  
+# am.currency.usd?  
+
+# in responses if a field requested wich user has no access to then it's an error. (Unknown field)
+# so instead of "optional" it has to be conditional and only makes sense for responses in queries 
+# conditional makes sense only in context of commands and queries 
+
+
+class Payments < Hexa::Domain
+  Person = Record[email: Option[Email]]  # union or choice? choice sounds better
+
+  NULL = Undefined = Optional[]
+
+  CommandHandler = CreateCaseFile * FeeTable * UserName * SomeOtherModel >> List[CaseFileWasCreated]
+  CaseFileProjector = CaseFileWasCreated * CaseFile >> ReceivableSide
+  UpdateUserParams = Record[first_name: Union[Str, Nothing], last_name: Optional[Str], ]
+  UpdateUser = Command * UpdateUserParams
+
+
+  PatchClaimData = ClaimData.optional
+  PatchClaim = Command * PatchClaimData
+  MainClaimCreatedEvent = Event[PatchClaimData]
+
+  CaseFileIdParams = Record[case_file_id: CaseFileId]
+  Data = Query[CaseFileIdParams, Response]
+  Record = AllOf[] + OneOf[]
+
+  Model = Entity[UserId, name: UserName]
+  
+
+  PathChaimHandler = Handler[PatchClaim * CaseFile >> List[MainClaimCreatedEvent, MainClaim]]
+  StateStoredRepository = Command >> Model
+  UserEvents = Event1 | Event2 | Event3 | Event4 | Event5 
+  EventSourcingRepository = Command >> List[UserEvents]
+  ModelInitialState = Nothing >> Model 
+  
+  MyQueryHandler = Handler[Query[Request, Response] * Model1 * Model2 >> Stream[Response]] 
+  #
+  # AllCommands, AllRepositories, All
+
+  # StateStoredRepository.new do  
+  EcternalEventHandler = ExternalEven * State >> Command 
+  CommandWithoutEventSourcing = Command * State >> State
+  RepostoryStateSave = State >> Nothing 
+  Repository = Command >> State, State >> Nothing 
+  
+  #  
+  # end
+  
+  # Record = make one of? Or OneOf[], AllOf - is a record  
+  # Record + Record  
+  # Record1 + Record2 - Record3 (all of record1 and all of Record2 and one of Record3)   
+  # Record1 ^ Record2 - old fields from record 1 or All fields from record 2 
+  # Tuple + Tuple 
+  # ~Record = make all optional
+end
+
+
+# These gives domain definition, not implementation
+
+
+# Choice
+# 1) Do not allow the same type
+# 2) If can't distinguish automatically then request tag 
+
+```
 
 
 
