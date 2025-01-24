@@ -21,10 +21,10 @@ classDiagram
       Type <|-- Native
       Native <|-- Str
       Native <|-- Number
-      Number <|-- BigInt
-      BigInt <|-- Int
+      Native <|-- BigInt
+      Native <|-- Int
       Number <|-- Double
-      Double   <|-- Real
+      Native <|-- Real
       Native <|-- Bool
       Native <|-- Date
       Native <|-- Time  
