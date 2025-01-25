@@ -43,3 +43,7 @@ class TestPipeline < Hexa::Pipes::Seq
   end
 end
 
+class TestType < Hexa::Type
+
+end
+
