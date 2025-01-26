@@ -248,26 +248,30 @@ Result a Tuple (for tuple input) or a Record (for record input)
 class UserAccount < Hexa::Domain 
   user_data = { first_name: str, last_name: str }
 
-  CreateUser = command :create_user, **user_data # command :name, record[...params]
+  CreateUser = type command :create_user, **user_data # command :name, record[...params]
       
-  User = entity :user, str, **user_data  # entity :name, id, record[... attributes] 
-  Account = entity :account, str, balance: int
-  Order = entity :order, str, date: date, amount: int
+  User = type entity :user, str, **user_data  # entity :name, id, record[... attributes] 
+  Account = type entity :account, str, balance: int
+  Order = type entity :order, str, date: date, amount: int
+
+  AccWasCreaded = type event
+  AccWasFunded = type event
+  AccWasWithdrawn = type event
    
-  AccountEvents = list(AccWasCreaded, AccWasFunded, AccWasWithdrawn)
+  AccountEvents = AccWasCreaded | AccWasFunded | AccWasWithdrawn
    
   Ports = init record get_user: CreateUser >> io(User),
                       put_user: User >> io,
-                      get_account_events: CreateUser >> io(AccountEvents),
+                      get_account_events: CreateUser >> io(AccountEvents.list),
                       put_account_events: AccountEvents >> io,
                       get_order: CreateUser >> io(Order),
                       put_order: Order >> io,
                       user_id_provider: Nothing >> io(str)
    
   repository Ports[:get_user], Ports[:put_user], Ports[:get_account_events], Ports[:put_account_events],
-             Ports[:get_order], Ports[:put_order]
+             Ports[:get_order], Ports[:put_order] # this will generate a func with a native implementation aka proc 
 
-  UserEvents = list(Event1, Event2, Event3, Event4)
+  UserEvents = type Event1 | Event2 | Event3 | Event4
 
   # decider builder 
   decide CreateUser * Ports[:user_id_provider] >> result(UserEvents) do |command, id_provider| 
