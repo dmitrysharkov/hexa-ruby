@@ -4,19 +4,11 @@ require 'minitest/autorun'
 require 'hexa'
 require 'pry-byebug'
 
-SUITS = { club: 'C', diamond: 'D', spade: 'S', heart: 'H' }.freeze
-RANKS = { two: '2', three: '3', four: '4', five: '5', six: '6', seven: '7', eight: '8',
-          nine: '9', ten: '10', jack: 'J', queen: 'Q', king: 'K', ace: 'A' }.freeze
-
 class OperatorsSyntax < Hexa::Scope
-  club, diamond, spade, heart = constants(*SUITS.map { |k, v| str[k, eq: v] })
+  Suit = type enum(club: 'C', diamond: 'D', spade: 'S', heart: 'H')
 
-  Suit = type club | diamond | spade | heart
-
-  two, three, four, five, six, seven, eight, nine, ten, jack, queen, king, ace =
-    constants(*RANKS.map { |k, v| str[k, eq: v] })
-
-  Rank = type two | three | four | five | six | seven | eight | nine | ten | jack | queen | king | ace
+  Rank = type enum[two: '2', three: '3', four: '4', five: '5', six: '6', seven: '7', eight: '8',
+                   nine: '9', ten: '10', jack: 'J', queen: 'Q', king: 'K', ace: 'A']
 
   Card = type Suit * Rank
 
@@ -28,11 +20,7 @@ class OperatorsSyntax < Hexa::Scope
 
   Game = type Deck * ~Player
 
-  Deal = const :deal, Deck >> Deck * Card
-
-  PickupCard = const :pickup_card, Hand * Card >> Hand
-
-  implement Deal
+  Deal = implement fn Deck >> Deck * Card
   def deal(deck)
     card = deck.first
     new_deck = deck[2..]
@@ -40,19 +28,20 @@ class OperatorsSyntax < Hexa::Scope
     [new_deck, card]
   end
 
-  implement PickupCard
+  PickupCard = implement fn Hand * Card >> Hand
   def pickup_card(hand, card)
     hand.to_a + [card]
   end
 
-  export nil, Deal, PickupCard
+  export
 end
 
 
 class ScquareBracesSyntax < Hexa::Scope
-  Suit = type enum.of(**SUITS) # enum is just a syntax sugar. it will create consts and then a choice type
+  Suit = type enum[club: 'C', diamond: 'D', spade: 'S', heart: 'H']
 
-  Rank = type enum.of(**RANKS)
+  Rank = type enum[two: '2', three: '3', four: '4', five: '5', six: '6', seven: '7', eight: '8',
+                   nine: '9', ten: '10', jack: 'J', queen: 'Q', king: 'K', ace: 'A']
 
   Card = type tuple[Suit, Rank]
 
@@ -64,16 +53,31 @@ class ScquareBracesSyntax < Hexa::Scope
 
   Game = type tuple[Deck, list[Player]]
 
-  Deal = const func[Deck, tuple[Deck, Card]]
-
-  PickupCard = const func[tuple[Hand, Card], Hand]
-
-  implement Deal
+  Deal = implement fn func[Deck, tuple[Deck, Card]]
   def deal(deck)
     card = deck.first
     new_deck = deck[2..]
 
     [new_deck, card]
   end
+
+  PickupCard = implement fn func[tuple[Hand, Card], Hand]
+  def deal(deck)
+    card = deck.first
+    new_deck = deck[2..]
+
+    [new_deck, card]
+  end
+end
+
+class Example < Hexa::Scope
+  t1 = type record.wip
+  selection_1 = str >> either(t1)
+  f1 = const selection_1
+  f2 = const selection_1
+  f3 = const selection_1
+  f4 = const selection_
+
+  f4 = one_of(all_of(f1[:f1], f2[:f2], f3[:f3]), f4)
 end
 

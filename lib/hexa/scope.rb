@@ -6,10 +6,8 @@ module Hexa
       def implement(func=nil, &block)
       end
 
-      def type(*types)
-        return types.map(&:freeze) if types.size > 1
-
-        types[0].tap(&:freeze)
+      def type(type_builder)
+        # it will receive a type builded and return a type
       end
 
       def init(type)
@@ -23,15 +21,15 @@ module Hexa
         NothingType.prototype
       end
 
-      def tuple
+      def tuple(*args, **kw_args)
         TupleType.prototype
       end
 
-      def str
+      def str(*args, **kw_args)
         StrType.prototype
       end
 
-      def int
+      def int(*args, **kw_args)
         IntType.prototype
       end
 
@@ -39,27 +37,29 @@ module Hexa
         DateType.prototype
       end
 
-      def list
+      def list(*args, **kw_args)
         ListType.prototype
       end
 
-      def enum
-        proc do |*args, **kw_args|
-          name = args.unshift
-          kw_args += args.map { |x| [x, x] }.map(&:to_h)
-          c = constants(**kw_args)
-          ch = choice.of(**c)
-          ch.key(:name) if name
-          ch
-        end
+      def enum(*args, **kw_args)
+        # proc do |*args, **kw_args|
+        #   name = args.unshift
+        #   kw_args += args.map { |x| [x, x] }.map(&:to_h)
+        #   c = constants(**kw_args)
+        #   ch = choice.of(**c)
+        #   ch.key(:name) if name
+        #   ch
+        # end
       end
+
+      def fn(name, type = nil, &block); end
 
       # record is just a syntax sugar for a tuple
-      def record
+      def record(*args, **kw_args)
 
       end
 
-      def choice
+      def choice(*args, **kw_args)
         ChoiceType.prototype
       end
 
@@ -67,22 +67,42 @@ module Hexa
         FuncType.prototype
       end
 
-      def pipe
+      def pipe(*args, &block)
       end
 
       def maybe
       end
 
-      def all_of
+      # output will be a tuple on success and
+      def all_of(*args)
+        # 1. check all args are constant functions
+        # 2. check all args have the same input type
+        # 3. check all args have a monadic either or non monadic output type
+        # 4. build output type
+        # 5. build const func type
+        # 6. build trusted implementation
+        # 7. return const input type
       end
 
-      def any_of
+      # output will be a list
+      def any_of(*args)
+        # 1. check all args are constant functions
+        # 2. check all args have the same input type
+        # 3. check all args have a monadic either or non monadic output type
+        # 4. build output type
+        # 5. build const func type
+        # 6. build trusted implementation
+        # 7. return const input type
       end
 
       def one_of
       end
 
-      def const(type)
+      def either(type)
+      end
+
+      def const(name, type = nil)
+        type, name = type ? [type, name] : [name, nil]
         type.singleton.freeze
       end
 
@@ -106,9 +126,9 @@ module Hexa
       #   @exports
       # end
 
-      def export(*args, **kw_args)
+      def export(default = nil, **kw_args)
         # check if implemented
-        defaule = args.unshift
+
         @exports = default
       end
 
