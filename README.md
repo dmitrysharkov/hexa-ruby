@@ -162,6 +162,9 @@ end
 ### Maybe
 ### Panic
 
+## Pipeline
+### Pipe requires native implementation at least for now
+
 ## Composers 
 ### Sequence 
 ```ruby

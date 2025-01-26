@@ -63,7 +63,7 @@ module Hexa
         ChoiceType.prototype
       end
 
-      def func
+      def func(*argc)
         FuncType.prototype
       end
 
