@@ -71,14 +71,3 @@ class ScquareBracesSyntax < Hexa::Scope
   end
 end
 
-class Example < Hexa::Scope
-  t1 = type record.wip
-  selection_1 = str >> either(t1)
-  f1 = const selection_1
-  f2 = const selection_1
-  f3 = const selection_1
-  f4 = const selection_
-
-  f4 = one_of(all_of(f1[:f1], f2[:f2], f3[:f3]), f4)
-end
-

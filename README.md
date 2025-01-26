@@ -377,11 +377,13 @@ class InstallmetnPlans < Hexa::Domain
   
   Cents = type int(:cents, gt: 100)
   Currency = type enum.key(:currency).of(supported_currencies)
-  Amount = record(:amount, Cents, Currency)
+  Amount = type record(:amount, Cents, Currency)
 
-  CreateInstallmentPlan = command(:create_installmetn_plan, CaseFileId, 
-                                                            Amount, 
-                                                            start_date: date(gt: earliest_date, lte: latest_date)
+  CreateInstallmentPlan = type command(:create_installmetn_plan, 
+                                       CaseFileId, 
+                                       Amount, 
+                                       start_date: date(gt: earliest_date, lte: latest_date)
+  
   InstallmetnPlanWasCreated = event.wip
   
   decide CreateInstallmentPlan >> list(InstallmetnPlanWasCreated) do |command|
