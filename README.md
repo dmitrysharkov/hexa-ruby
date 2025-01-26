@@ -180,8 +180,8 @@ class MyScope < Hexa::Scope
     pipe pipe_func, :four  
   end
   
-  pipeline str >> str, :backward do
-    pipe pipe_func, :four
+  pipeline str >> str, :backward do |inp|
+    pipe inp * input >> str, :four
     pipe pipe_func, :three
     pipe pipe_func, :two
     pipe pipe_func, :one
