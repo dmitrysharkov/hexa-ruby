@@ -67,6 +67,59 @@ classDiagram
 ## Func Type
 ### ```>>``` operator
 
+## Methods 
+* methods can't change the object. just read only 
+
+```ruby 
+class TestScope < Hexa::Scope 
+   Email = type str(format: '/email-regexp-here/')
+   User = type record first_name: str, lasrt_name: str, email: Email
+     
+   method :full_name, User >> Str { |user| |u| "#{u[:first_name].upcase #{u.last_name].upcase}" }
+end 
+```
+
+### Methods implementations with pipes
+
+```ruby 
+class TestScope < Hexa::Scope 
+   Email = type str(format: '/email-regexp-here/')
+   User = type record first_name: str, lasrt_name: str, email: Email
+     
+   method_pipe :full_name, User >> Str do |user| 
+     pipe user >> Str { |user| |u| "#{u[:first_name].upcase #{u.last_name].upcase}" }
+   end 
+end 
+```
+
+### Method For Native Types 
+* Methods can be added to native types           
+
+### Methods with Parameters 
+
+
+## Constraints 
+* constrains are just like functions 
+* invariants are curried constraints
+* constraints might have parameters 
+* constraints parameters might be curried?
+```ruby 
+class TestScope < Hexa::Scope 
+  BED_WORDS = %w[foo moo poo]
+   
+  constraint :good_word, str >> bool { |str| !BED_WORDS.include?(str) }
+  constraint :divided_by, int * int >> bool { |x, base| x % base }
+  
+  Name = type str.and(:good_word)
+  Count = type int.and(divided_by: 3)
+  
+end 
+```
+
+### Constraints with parameters
+
+                                     
+
 
 
 ## Types operations
@@ -166,13 +219,13 @@ class UserAccount < Hexa::Domain
     doc :world, "World"
   end
   
-  Default = pipeline str >> str do
+  Call = pipeline str >> str do
     pipe :one
     pipe :two
     pipe :three
   end
   
-  doc Default do 
+  doc :call do 
     doc "One"
     doc "Two"
     doc "Three"
@@ -186,7 +239,7 @@ end
 class UserAccount < Hexa::Domain
   User = type record name: str, email: str
 
-  Default = pipeline str >> str do
+  Call = pipeline str >> str do
     pipe :one
     pipe :two
     pipe :three
@@ -237,13 +290,17 @@ end
 * ```Sub``` for generic parameter substitution
 
 # Monads
-## Success (Result)
-## Failure
-## Skip
-## Maybe
-## Panic
-## IO
 
+* Success (Result)
+* Failure
+* Skip
+* Maybe
+* Panic
+* IO
+
+## In Pipelines
+* if calculation get "infected with a monad once" it will become with this monad always. 
+* there is no way to get reed of a monad
 
 
 # Functional Compositions
@@ -298,8 +355,10 @@ class MyScope < Hexa::Scope
   def four(str, inp)
     str + ":f4[#{inp.join(',')}]"
   end
+
+  Call = Forward
   
-  seal Forward # at the moment of export we will check that all implementations are in place 
+  seal # at the moment of export we will check that all implementations are in place 
 end
 
 class MyScopeAlternativeSyntax < Hexa::Scope
@@ -329,8 +388,8 @@ class MyScopeAlternativeSyntax < Hexa::Scope
   def four(str, inp)
     str + ":f4[#{inp.join(',')}]"
   end
-  
-  Default = Forward
+
+  Call = Forward
 
   seal  # at the moment of export we will check that all implementations are in place 
 end
@@ -500,33 +559,54 @@ class InstallmetnPlans < Hexa::Domain
   currency = type enum(:usd, :eur, :chf)
   input = init record supported_currencies: currency.list, current_date: date 
   
-  earliest_date = const input[:current_date]
-
   latest_date = fn input >> date { |x| x[:current_date] + 1.day }
-  
-  supported_currencies = fn input >> currency.list { |x| x[:supported_currencies] } 
   
   CaseFileId = type str.wip
   
   Cents = type int gt: 100
-  Currency = type enum supported_currencies # enum can take a const list 
+  Currency = type currency.constraint(in: input[:supported_currencies]) # constraint on enum 
   Amount = type record cents: Cents, currency: Currency
+  
+  InstallmentPlanData = type record case_file_id: CaseFileId,  # validatrors can take constas/constructors and params 
+                                    amount: Amount,
+                                    start_date: date(gt: input[:current_date], lte: latest_date) 
+  
+  InstallmentPlan = type entity amount: Amount, date: Daye  
 
-  CreateInstallmentPlan = type command case_file_od: CaseFileId, 
-                                       amount: Amount, 
-                                       start_date: date(gt: earliest_date, lte: latest_date)
+  CreateInstallmentPlan = type command 
   
   InstallmetnPlanWasCreated = event.wip
   
-  decide CreateInstallmentPlan >> InstallmetnPlanWasCreated.list do |command|
+  factory input >> InstallmentPlan 
+  
+  decide CreateInstallmentPlan * InstallmetnPlan >> InstallmetnPlanWasCreated.list do |command, state|
     # ... 
   end
   
+  evolve InstallmetnPlanWasCreated * InstallmetnPlan >> InstallmetnPlan do |event, state|  
   seal   
+  
+  react InstallmetnPlanWasCreated * InstallmetnPlan >> Nothing do 
+  end
 end 
 
 ip_scope =  InstallmetnPlans.new(%w[usd eur], Date.today)
 ```
+
+# fDDD
+## Aggregate
+## Entity 
+### Entity Mutator 
+## Repository 
+## Factory 
+## Event 
+## Command 
+## Notification 
+## Query 
+## Decide
+## Evolve
+## React 
+## Saga
 
 
 

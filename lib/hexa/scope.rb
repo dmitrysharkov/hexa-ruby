@@ -115,13 +115,8 @@ module Hexa
         # 2. Inflect names
         # 3. Save to types map
         # 4. Define methods
-        types { |_, v| v.is_a?(FuncType) && v.singleton?).each do |name, type|
-          define_method(name) { |*args, **kv_args| type.call(self, *args, **kv_args).to_result(return_results )  }
-        end
-
-        if const_defined?(:Default)
-          default = const_get(:Default)
-          define_method(:call) { |*arg,  **kw_args| default.call(self, *arg, **kw_args).to_result(return_results ) }
+        types { |_, v| v.is_a?(FuncType) && v.singleton?).each do |name, fn|
+          define_method(name) { |*args, **kv_args| invoke(fn, *args, **kv_args).to_result(return_results )  }
         end
       end
     end
@@ -129,11 +124,11 @@ module Hexa
     attr_reader :params
 
     def to_proc(name = nil)
+      fn = types[name]
+
       raise "#{name} is not a function" unless name && !(fn.is_a?(FuncType) && fn.singleton?)
 
-      fn = name ? types[name] : method(:call)
-
-      proc { |*arg, **kw_args| fn.call(self, *arg, **kw_args).to_result(return_results ) }
+      proc { |*arg, **kw_args| invoke(fn, *arg, **kw_args).to_result(return_results ) }
     end
 
     attr_reader :return_results
@@ -146,6 +141,12 @@ module Hexa
     def to_result
       @return_results = true
       self
+    end
+
+    private
+
+    def invoke(fn, *args, **kw_args)
+      fn.call(self, *args, **kw_args)
     end
   end
 end
