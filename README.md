@@ -18,6 +18,8 @@ classDiagram
       Type <|-- Tuple
       Type <|-- Union
       Type <|-- Enum
+      Type <|-- List
+      Type <|-- Map
       Type <|-- Native
       Native <|-- Str
       Native <|-- Number
@@ -42,15 +44,14 @@ classDiagram
 
 ## Nothing Type
 ### Nothing vs. ```nil``` (no nil in managed code!)
-## Type keys
-* Types might have tags
-* Tag might be used in Records or Choice construction as default key
-* If (A | Nothing) is used type construction and A has a tag then the tag might be used as a default key
-* If type has a tag then it might be used as implementation param name
+## ~~Type keys~~
+* ~~Types might have tags~~
+* ~~Tag might be used in Records or Choice construction as default key~~
+* ~~If (A | Nothing) is used type construction and A has a tag then the tag might be used as a default key~~
+* ~~If type has a tag then it might be used as implementation param name~~
 ## Record Type
 ### Items 
-* all items are types with keys 
-* recod constructor will automatically 
+* all items are types with keys
 ### Records Constraints 
 ### Records Composition ```+``` 
 ## Choice Type
@@ -64,7 +65,7 @@ classDiagram
 ### Prefix Items
 ### Constraints
 ## Func Type
-#### ```>>``` operator 
+### ```>>``` operator
 
 
 
@@ -93,20 +94,10 @@ classDiagram
 ```Record[a:..., b:...] + Unin[Record[c:...],Record[d:...]]```  &rarr; ```Union[Record[a:..., b:...,c:...], Record[a:..., b:...,d:...]]```
 
 
-```Func1(...) & Func2(...)```  &rarr; ```Func2(Func1(...))```
+```Func1(...) & Func2(...)```  &rarr; ```Func2(Func1(...))``` this will explicitly create a pipeline
 
 ```Type1 >> Type2 ``` &rarr; ```Func[Type1, Type2]```
 
-## Type annotation 
-* ```title```
-* ```doc```
-* ```tag``` - each type might have many tags
-* ```id``` - kind of "always uniq" tag.
-```ruby
-class TestScope < Hexa::Scope
-  
-end
-```
 
 ## Custom Types 
 ### Native 
@@ -135,56 +126,161 @@ end
 ```
 
 # Scopes  
-## Imports
-## Exports
-* It will export everithin from the export list 
-* calling ```export``` will create an export list and will freeze the scope
-* it will not be possible to inherit frozen scope 
-* All constans in the scope will be added to the export list automatically 
+## Sealing
+* ```seal``` will convert all type constance into map { name => type }
+* ```seal``` may have a default parameter. if yes then a call method will be defined.
+
 ## Initialization 
-* ```init``` keyword 
-## Instantiation
+* ```init``` keyword will create a constant 
+* params described in ```init``` will become the Scope class constructor params   
+
+## Functions 
+* ```fn``` keyword to define a function 
+* Function will explicitly create a pipeline with only one pipe 
+* function can be initialized from:
+  - __symbol__: local method 
+  - __collable__: Anything which has call method 
+  - __Block__:
+* If function has a parameter with is a constant or a constructor function then it will be automatically curried 
+
+## Constructors 
+* A function with no input parameters (Nothing) is a constructor. it will be automatically calculated 
+
 ## Constants
-* Constans are special kind of types - singletone types. I.e. type which might have only one value 
+* Constants have to be followed by implementation (block) or a constant expression 
+* Constants will explicitly create a constructor function
+* Constant expression will explicitly create a constructor function
+
+## Annotations 
+* Annotation can be added for every type like
+```ruby
+class UserAccount < Hexa::Domain 
+  User = type record name: str, email: str
+  
+  doc User, "Hello World"
+  doc User, :name, "Name"
+  doc User, name: "Name", email: "Email" 
+  
+  doc User do 
+    doc :name, "Hello"
+    doc :world, "World"
+  end
+  
+  Default = pipeline str >> str do
+    pipe :one
+    pipe :two
+    pipe :three
+  end
+  
+  doc Default do 
+    doc "One"
+    doc "Two"
+    doc "Three"
+  end
+end
+
+```
+* It's better to keep annotations as a separate moule 
+```ruby
+
+class UserAccount < Hexa::Domain
+  User = type record name: str, email: str
+
+  Default = pipeline str >> str do
+    pipe :one
+    pipe :two
+    pipe :three
+  end
+
+  include Implementations
+  include Annotations  
+  
+  seal
+end
+
+
+class UserAccount < Hexa::Domain 
+  module Annotations
+    extend Hexa::Patial 
+    
+    included do
+      doc :user, "Hello World", name: "Name", email: "Email"
+      doc :default, :items, ["One", "Two", "Three"]
+    end
+  end
+end
+
+class UserAccount < Hexa::Domain
+  module Implementations
+    def one(str)
+      "one: #{str}"  
+    end
+    
+    def two
+      "two: #{str}"
+    end
+
+    def three
+      "three: #{str}"
+    end
+  end
+end
+
+```
+
+
+
 
 # Generics
 
 * ```Typ``` for generic parameter
 * ```Sub``` for generic parameter substitution
 
+# Monads
+## Success (Result)
+## Failure
+## Skip
+## Maybe
+## Panic
+## IO
+
+
 
 # Functional Compositions
 
-## Monads
-### Success
-### Failure
-### Skip
-### Maybe
-### Panic
 
-## Pipeline
-### Pipe requires native implementation at least for now
+# Pipeline
+* ```pipeline``` keyword 
+## Pipes 
+* requires native implementation
+  - ~symbol~ means class method. In this case seal  
+  - ~block~ block is an implemenation 
+* can take as 1-st parameter:
+  - function type (has to match previos and next pipe)
+  - just output type. (input type will be inferred from the previous pipe output)
+  - noting (output type will be the same as input and input will be in inferred from the prev. pipe output)
+* first pipe has to be a constructor function (i.e. all it's inputs are curried either from constants, 
+  or form constructors, or from pipeline input parameters)
+* last pipe output has to match pipeline output type 
 
 ## Composers 
-### Sequence 
+### Pipelines inside pipelines 
 ```ruby
 class MyScope < Hexa::Scope
   input = init str * str 
   
-  pipe_func = type str * input >> str
-
-  pipeline str >> str, :forward do |inp|
+  Forward = pipeline str >> str do |inp|
     pipe inp * input >> str, :one # pipe method will create a function with implementation method(:one)
-    pipe pipe_func, :two
-    pipe pipe_func, :three
-    pipe pipe_func, :four  
+    pipe :two  #input and output type will be inferred automatically  
+    pipe :three
+    pipe :four  
   end
   
-  pipeline str >> str, :backward do |inp|
+  Backward = pipeline str >> str do |inp|
     pipe inp * input >> str, :four
-    pipe pipe_func, :three
-    pipe pipe_func, :two
-    pipe pipe_func, :one
+    pipe :three
+    pipe :two
+    pipe :one
   end
  
   def one(str, inp)
@@ -203,7 +299,40 @@ class MyScope < Hexa::Scope
     str + ":f4[#{inp.join(',')}]"
   end
   
-  export(:forward, backward:) # at the moment of export we will check that all implementations are in place 
+  seal Forward # at the moment of export we will check that all implementations are in place 
+end
+
+class MyScopeAlternativeSyntax < Hexa::Scope
+  input = init str * str
+  
+  one = fn str * input >> str, :one
+  two = fn str * input >> str, :two
+  three = fn str * input >> str, :three
+  four = fn str * input >> str, :four
+
+  Forward = one & two & three & four
+
+  Backward = one + two + three + four
+
+  def one(str, inp)
+    str + ":f1[#{inp.join(',')}]"
+  end
+
+  def two(str, inp)
+    str + ":f2[#{inp.join(',')}]"
+  end
+
+  def three(str, inp)
+    str + ":f3[#{inp.join(',')}]"
+  end
+
+  def four(str, inp)
+    str + ":f4[#{inp.join(',')}]"
+  end
+  
+  Default = Forward
+
+  seal  # at the moment of export we will check that all implementations are in place 
 end
 
 test = MyScope.new('aaa', 'bbb')
@@ -237,34 +366,38 @@ Result a Tuple (for tuple input) or a Record (for record input)
       pipe str >> maybe(Event3), :native_impl_3
       pipe str >> maybe(Event4), :native_impl_4
     end
+    # result is a tuple of monads
 
-    # result is a tuple of monads
-    # result is a tuple of monads
     join  # options: all_or_error, all_or_error
   end 
 ```
 
 ```ruby
 class UserAccount < Hexa::Domain 
-  user_data = { first_name: str, last_name: str }
+  user_data = type record first_name: str, last_name: str
 
-  CreateUser = type command :create_user, **user_data # command :name, record[...params]
+  CreateUser = type command + user_data # + means that command will concatenate all attributes from the record 
+  
+  UserId = type str 
+  
+  UserAggregate = type aggregate UserId # aggegate takes an id type as a parameter
       
-  User = type entity :user, str, **user_data  # entity :name, id, record[... attributes] 
-  Account = type entity :account, str, balance: int
-  Order = type entity :order, str, date: date, amount: int
+  User = type entity(UserAggregate) + user_data # if entity takes an aggreagte as a key, then it becomes an aggregate 
+                                                # root entity. each command has to have at least on aggregate root   
+  Account = type entity UserAggregate, balance: int
+  Order = type entity UserAggregate, date: date, amount: int
 
-  AccWasCreaded = type event
-  AccWasFunded = type event
-  AccWasWithdrawn = type event
+  AccWasCreaded = type event.wip
+  AccWasFunded = type event.wip
+  AccWasWithdrawn = type event.wip
    
-  AccountEvents = AccWasCreaded | AccWasFunded | AccWasWithdrawn
+  AccountEvents = type AccWasCreaded | AccWasFunded | AccWasWithdrawn
    
-  Ports = init record get_user: CreateUser >> io(User),
+  Ports = init record get_user: UserId >> io(User),
                       put_user: User >> io,
-                      get_account_events: CreateUser >> io(AccountEvents.list),
+                      get_account_events: UserId >> io(AccountEvents.list),
                       put_account_events: AccountEvents >> io,
-                      get_order: CreateUser >> io(Order),
+                      get_order: UserId >> io(Order),
                       put_order: Order >> io,
                       user_id_provider: Nothing >> io(str)
    
@@ -292,7 +425,7 @@ class UserAccount < Hexa::Domain
     end
   end
   
-  export # export here is overloaded. it will  
+  seal # export here is overloaded. it will  
 end
 ```
 ### Pipeline blocks
@@ -330,7 +463,7 @@ Any Of
 
 ```ruby
 class Accounting < Hexa::Domain 
-  Cents = type int :cents  
+  Cents = type int.wip 
   
   MainClaim = type record.wip
   
@@ -365,32 +498,31 @@ Putting external parameters to validators
 ```ruby 
 class InstallmetnPlans < Hexa::Domain
   currency = type enum(:usd, :eur, :chf)
-  input = init record(supported_currencies: currency.list, current_date: date) 
+  input = init record supported_currencies: currency.list, current_date: date 
   
   earliest_date = const input[:current_date]
 
-  latest_date = const(input >> date) { |x| x[:current_date] + 1.day }
+  latest_date = fn input >> date { |x| x[:current_date] + 1.day }
   
-  supported_currencies = const(input >> currency.list) { |x| x[:supported_currencies] } # short cut 
+  supported_currencies = fn input >> currency.list { |x| x[:supported_currencies] } 
   
-  CaseFileId = type str(:case_file_id).wip
+  CaseFileId = type str.wip
   
-  Cents = type int(:cents, gt: 100)
-  Currency = type enum.key(:currency).of(supported_currencies)
-  Amount = type record(:amount, Cents, Currency)
+  Cents = type int gt: 100
+  Currency = type enum supported_currencies # enum can take a const list 
+  Amount = type record cents: Cents, currency: Currency
 
-  CreateInstallmentPlan = type command(:create_installmetn_plan, 
-                                       CaseFileId, 
-                                       Amount, 
+  CreateInstallmentPlan = type command case_file_od: CaseFileId, 
+                                       amount: Amount, 
                                        start_date: date(gt: earliest_date, lte: latest_date)
   
   InstallmetnPlanWasCreated = event.wip
   
-  decide CreateInstallmentPlan >> list(InstallmetnPlanWasCreated) do |command|
+  decide CreateInstallmentPlan >> InstallmetnPlanWasCreated.list do |command|
     # ... 
   end
   
-  export   
+  seal   
 end 
 
 ip_scope =  InstallmetnPlans.new(%w[usd eur], Date.today)

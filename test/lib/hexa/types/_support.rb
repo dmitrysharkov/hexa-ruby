@@ -35,7 +35,7 @@ class OperatorsSyntax < Hexa::Scope
     hand.to_a + [card]
   end
 
-  export
+  seal
 end
 
 
@@ -69,5 +69,7 @@ class ScquareBracesSyntax < Hexa::Scope
   def pickup_card(hand, card)
     hand.to_a + [card]
   end
+
+  seal
 end
 

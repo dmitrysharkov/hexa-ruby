@@ -1,6 +1,9 @@
 module Hexa
   class Domain < Scope
     class << self
+      def aggregate(id_type)
+
+      end
       def decide(command, *models)
         events = models.last
         models = models[..-2]

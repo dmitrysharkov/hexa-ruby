@@ -110,52 +110,42 @@ module Hexa
         types.each(&:singleton).map(&:freeze)
       end
 
-      # def export(default = nil, **exports)
-      #   @default_function = default if default
-      #   @exports = exports
-      #   exports.each do |k, v|
-      #     define_method(k) { |*args, **kw_args| v.call(*args, **kw_args) }
-      #   end
-      # end
-      #
-      # def default_function
-      #   @default_function
-      # end
-      #
-      # def exports
-      #   @exports
-      # end
+      def seal
+        # 1. Iterate all constants. Find those which are types
+        # 2. Inflect names
+        # 3. Save to types map
+        # 4. Define methods
+        types { |_, v| v.is_a?(FuncType) && v.singleton?).each do |name, type|
+          define_method(name) { |*args, **kv_args| type.call(self, *args, **kv_args).to_result(return_results )  }
+        end
 
-      def export(default = nil, **kw_args)
-        # check if implemented
-
-        @exports = default
-      end
-
-      def exports
-        @exports
+        if const_defined?(:Default)
+          default = const_get(:Default)
+          define_method(:call) { |*arg,  **kw_args| default.call(self, *arg, **kw_args).to_result(return_results ) }
+        end
       end
     end
 
     attr_reader :params
 
-    def call(*arg, **kw_args)
-      exports = self.class.exports
-      case exports
-      when FuncType then self.class.exports.call(*arg, **kw_args)
-      end
+    def to_proc(name = nil)
+      raise "#{name} is not a function" unless name && !(fn.is_a?(FuncType) && fn.singleton?)
+
+      fn = name ? types[name] : method(:call)
+
+      proc { |*arg, **kw_args| fn.call(self, *arg, **kw_args).to_result(return_results ) }
     end
 
-    def to_proc
-      proc { |*arg, **kw_args| exports.call(*arg, **kw_args) }
-    end
-
-    def invoke(name, *arg, **kw_args)
-      self.class.exports[name].call(*arg, **kw_args)
-    end
+    attr_reader :return_results
 
     def initialize(*args, **kw_args)
-      @params = init_type.value_class.new(*args, **kw_args)
+      @params = init_type.counstruct(*args, **kw_args)
+      @return_results = false
+    end
+
+    def to_result
+      @return_results = true
+      self
     end
   end
 end
