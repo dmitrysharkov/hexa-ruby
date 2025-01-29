@@ -5,204 +5,219 @@ Hexa is a Hexagonal Architecture Framework with element of Functional DDD.
 Reading List:
 * About Hexagonal Architecture and DDD read [here](https://herbertograca.com/2017/11/16/explicit-architecture-01-ddd-hexagonal-onion-clean-cqrs-how-i-put-it-all-together/).
 * About Functional DDD [here](https://fraktalio.com/blog/) and [here](https://www.slideshare.net/slideshow/domain-modeling-made-functional-devternity-2022/254826776#1)
-     
 
-# Types 
+
+## Types
+```ruby 
+class MyScope < Hexa::Scope
+  Re = type Regexp 
+end
+```
 
 ```mermaid
 classDiagram
       Type <|-- Nothing 
-      Type <|-- Func
-      Type <|-- Record
-      Type <|-- Choice 
-      Type <|-- Tuple
-      Type <|-- Union
-      Type <|-- Enum
-      Type <|-- List
-      Type <|-- Map
-      Type <|-- Native
-      Native <|-- Str
-      Native <|-- Number
-      Native <|-- BigInt
-      Native <|-- Int
-      Number <|-- Double
-      Native <|-- Real
-      Native <|-- Bool
-      Native <|-- Date
-      Native <|-- Time  
+      Type <|-- Signature
+      Type <|-- Structural
+      Structural <|-- Record
+      Structural <|-- Choice 
+      Structural <|-- Tuple
+      Structural <|-- Union
+      Structural <|-- List
+      Structural <|-- Map
+      Type <|-- Singular
+      Singular <|-- Enum
 ```
-## Declaring a type 
-* with ```type``` keyword
-## Native Types
-### Str
-### Int
-### Real
-### Bool
-### Date
-### Time
 
 
-## Nothing Type
-### Nothing vs. ```nil``` (no nil in managed code!)
-## ~~Type keys~~
-* ~~Types might have tags~~
-* ~~Tag might be used in Records or Choice construction as default key~~
-* ~~If (A | Nothing) is used type construction and A has a tag then the tag might be used as a default key~~
-* ~~If type has a tag then it might be used as implementation param name~~
-## Record Type
-### Items 
-* all items are types with keys
-### Records Constraints 
-### Records Composition ```+``` 
-## Choice Type
-### Records and Choices Composition ```+```
-## Union Type
-### ```|``` operator 
-## Tuple Type
-### ```*``` operator
-## List Type 
-### Items 
-### Prefix Items
-### Constraints
-## Func Type
-### ```>>``` operator
+Standard types:
+* __str__
+* __int__
+* __real__
+* __bool__
+
+
+## Constants 
+```ruby 
+class MyScope < Hexa::Scope
+  MyName = const str "Dima" 
+end
+```
+
+## Maybe 
+```ruby 
+class MyScope < Hexa::Scope
+  Re = type Regexp 
+  pattern = fn :pattern, Re * str >> bool { |re, s| s ~= re }
+  
+  Email = str.maybe & pattern[/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/]
+end
+```
+
+## Enums  
+```ruby 
+class MyScope < Hexa::Scope
+  Colors = enum white: 'W', black: 'B'  
+end
+``` 
+
+## Tuples 
+```ruby 
+class MyScope < Hexa::Scope
+  Colors = enum white: 'W', black: 'B'  
+  Ranks = enum pawn: 'P', nkight: 'Kn', bishop: 'B', tour: 'T', qween: 'Q', king: 'K'
+  Piece = Rank * Color
+  
+  white_bishop = const Piece, ['B', 'W']
+end
+``` 
+
+## Functions
+```ruby 
+class MyScope < Hexa::Scope
+  add = fn int * int >> int { |x, y| x + y } 
+end
+```
+
+
+### Signatures
+... TBD ...
+
+
+## Constraints
+```ruby 
+class MyScope < Hexa::Scope
+  Re = type Regexp 
+  pattern = fn :pattern, Re * str >> bool { |re, s| s ~= re }
+  
+  Email = str & pattern[/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/]
+end
+```
+
+## Key-Value pairs 
+```ruby 
+class MyScope < Hexa::Scope
+  User = str[:first_name] * str[:last_name]
+end
+```
+
+or better 
+
+```ruby 
+class MyScope < Hexa::Scope
+  FirstName = str[:first_name] & min_len(2)
+  LastName = str[:last_name] & min_len(2)
+  User = FirstName * LastName
+end
+```
+
+## Choices 
+
+```ruby 
+class MyScope < Hexa::Scope
+  FirstName = str[:first_name] & min_len(2)
+  LastName = str[:last_name] & min_len(2)
+  Person = FirstName * LastName
+  
+  UserOrAdmin = Person[:user] | Person[:admin]
+end
+```
+
+or 
+
+```ruby 
+class MyScope < Hexa::Scope
+  FirstName = str[:first_name] & min_len(2)
+  LastName = str[:last_name] & min_len(2)
+  Role[:role] = (const str 'admin') | (const str 'user')
+  
+  UserOrAdmin = FirstName * LastName * Role 
+end
+```
+
+
+## Lists 
+
+```ruby 
+class MyScope < Hexa::Scope
+  FirstName = str[:first_name] & min_len(2)
+  LastName = str[:last_name] & min_len(2)
+  Email = str[:email]
+  
+  User = FirstName * LastName * Email.list[:emails] 
+end
+```
+
+## Maps 
+
+... TBD ...
+
+
+
 
 ## Methods 
 * methods can't change the object. just read only 
 
 ```ruby 
 class TestScope < Hexa::Scope 
-   Email = type str(format: '/email-regexp-here/')
-   User = type record first_name: str, lasrt_name: str, email: Email
+  FirstName = str[:first_name] & min_len(2)
+  LastName = str[:last_name] & min_len(2)
+  Email = str[:email]
+  
+  User = FirstName * LastName * Email.list[:emails] 
      
-   method :full_name, User >> Str { |user| |u| "#{u[:first_name].upcase #{u.last_name].upcase}" }
+  fn :full_name, User >> str { |u| |u| "#{u.first_name.upcase #{u.last_name.upcase}" }
+  
+  fn :to_s, User >> str { |u| "#{u.full_name} #{u.email}" } 
 end 
 ```
 
-### Methods implementations with pipes
-
+## Types Composition
 ```ruby 
 class TestScope < Hexa::Scope 
-   Email = type str(format: '/email-regexp-here/')
-   User = type record first_name: str, lasrt_name: str, email: Email
-     
-   method_pipe :full_name, User >> Str do |user| 
-     pipe user >> Str { |user| |u| "#{u[:first_name].upcase #{u.last_name].upcase}" }
-   end 
+  Email = str[:email] & pattern[/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/]
+  PhoneNumber = str[:phone]
+  ContactInformation = Email * PhoneNumber.maybe  
+  
+  Person = str[:first_name] * str[:last_name] 
+  Company = str[:company_name] * str[:tax_number]
+      
+  Customer = (Person | Company) + ContactInformation + str.list[:tags].maybe   
 end 
 ```
 
-### Method For Native Types 
-* Methods can be added to native types           
+## Scope arguments 
+```ruby 
+class TestScope < Hexa::Scope   
+  args = init int[:max_amount].tuple 
+end 
+```
 
-### Methods with Parameters 
+## Curring function 
+```ruby 
+class TestScope < Hexa::Scope   
+  gt = fn int * int >> bool { |base, x| x > base } 
+  gt5 = gt[5]
+  gt10 = gt[10]
+  
+  seven = const int 7
+  gt_seven = gt[seven]
+end 
+```
 
-
-## Constraints 
-* constrains are just like functions 
-* invariants are curried constraints
-* constraints might have parameters 
-* constraints parameters might be curried?
+## Scope constant expressions 
 ```ruby 
 class TestScope < Hexa::Scope 
-  BED_WORDS = %w[foo moo poo]
-   
-  constraint :good_word, str >> bool { |str| !BED_WORDS.include?(str) }
-  constraint :divided_by, int * int >> bool { |x, base| x % base }
+  args = init int[:max_amount].tuple  
+  gt = fn int * int >> bool { |base, x| x > base } 
   
-  Name = type str.and(:good_word)
-  Count = type int.and(divided_by: 3)
+  gt_max_amount = gt[args[:max_amount]]
   
+  flag = calc gt_max_amount[100]
 end 
 ```
 
-### Constraints with parameters
 
-                                     
-
-
-
-## Types operations
-
-```Type1 | Tupe2```  &rarr; ```Union[Type1, Type2]```
-
-```Union[Type1, Tupe2] | Type3```  &rarr; ```Union[Type1, Type2, Type3]```
-
-```Union[Type1, Tupe2] | Union[Type3, Tupe4]```  &rarr; ```Union[Type1, Type2, Type3, Type4]```
-
-```Type1 * Type2```  &rarr; ```Tuple[Type1, Type2]```
-
-```Tuple[Type1, Type2] * Type3```  &rarr; ```Tuple[Type1, Type2, Type3]```
-
-```Tuple[Type1, Type2] * Tuple[Type3, Type4]```  &rarr; ```Tuple[Type1, Type2, Tuple[Type3, Type4]]```
-
-```Tuple[Type1, Type2] & Tuple[Type3, Type4]```  &rarr; ```Tuple[Type1, Type2, Type3, Type4]```
-
-```Record[a:..., b:...] + Record[c:..., d:...]```  &rarr; ```Record[a:..., b:..., c:..., d:....]```
-
-```Choice[a:..., b:...] + Choice[c:..., d:...]```  &rarr; ```Choice[a:..., b:..., c:..., d:....]```
-
-```Record[a:..., b:...] + Choice[c:..., d:...]```  &rarr; ```Union[Record[a:..., b:...,c:...], Record[a:..., b:...,d:...]]```
-
-```Record[a:..., b:...] + Unin[Record[c:...],Record[d:...]]```  &rarr; ```Union[Record[a:..., b:...,c:...], Record[a:..., b:...,d:...]]```
-
-
-```Func1(...) & Func2(...)```  &rarr; ```Func2(Func1(...))``` this will explicitly create a pipeline
-
-```Type1 >> Type2 ``` &rarr; ```Func[Type1, Type2]```
-
-
-## Custom Types 
-### Native 
-```ruby 
-class TestType < Hexa::NativeType 
-  builder do
-    def path(path)
-        
-    end   
-  end
-  
-  coerce String do
-    # ... 
-  end
-  
-  scope_helpers do
-    def file
-      TestType.prototype 
-    end  
-  end
-end
-
-class MyScope < Hexa::Scope 
-  include TestType.scope_helpers 
-end 
-```
-
-# Scopes  
-## Sealing
-* ```seal``` will convert all type constance into map { name => type }
-* ```seal``` may have a default parameter. if yes then a call method will be defined.
-
-## Initialization 
-* ```init``` keyword will create a constant 
-* params described in ```init``` will become the Scope class constructor params   
-
-## Functions 
-* ```fn``` keyword to define a function 
-* Function will explicitly create a pipeline with only one pipe 
-* function can be initialized from:
-  - __symbol__: local method 
-  - __collable__: Anything which has call method 
-  - __Block__:
-* If function has a parameter with is a constant or a constructor function then it will be automatically curried 
-
-## Constructors 
-* A function with no input parameters (Nothing) is a constructor. it will be automatically calculated 
-
-## Constants
-* Constants have to be followed by implementation (block) or a constant expression 
-* Constants will explicitly create a constructor function
-* Constant expression will explicitly create a constructor function
 
 ## Annotations 
 * Annotation can be added for every type like
@@ -253,14 +268,14 @@ end
 
 
 class UserAccount < Hexa::Domain 
-  module Annotations
-    extend Hexa::Patial 
-    
-    included do
-      doc :user, "Hello World", name: "Name", email: "Email"
-      doc :default, :items, ["One", "Two", "Three"]
-    end
-  end
+  # module Annotations
+  #   extend Hexa::Patial 
+  #  
+  #   included do
+  #     doc :user, "Hello World", name: "Name", email: "Email"
+  #     doc :default, :items, ["One", "Two", "Three"]
+  #   end
+  # end
 end
 
 class UserAccount < Hexa::Domain
@@ -281,13 +296,6 @@ end
 
 ```
 
-
-
-
-# Generics
-
-* ```Typ``` for generic parameter
-* ```Sub``` for generic parameter substitution
 
 # Monads
 
@@ -355,10 +363,8 @@ class MyScope < Hexa::Scope
   def four(str, inp)
     str + ":f4[#{inp.join(',')}]"
   end
-
-  Call = Forward
   
-  seal # at the moment of export we will check that all implementations are in place 
+  seal Forward# at the moment of export we will check that all implementations are in place 
 end
 
 class MyScopeAlternativeSyntax < Hexa::Scope
@@ -389,9 +395,9 @@ class MyScopeAlternativeSyntax < Hexa::Scope
     str + ":f4[#{inp.join(',')}]"
   end
 
-  Call = Forward
+  
 
-  seal  # at the moment of export we will check that all implementations are in place 
+  seal Forward  # at the moment of export we will check that all implementations are in place 
 end
 
 test = MyScope.new('aaa', 'bbb')
