@@ -8,12 +8,6 @@ Reading List:
 
 
 ## Types
-```ruby 
-class MyScope < Hexa::Scope
-  Re = type Regexp 
-end
-```
-
 ```mermaid
 classDiagram
       Type <|-- Nothing 
@@ -30,14 +24,38 @@ classDiagram
 ```
 
 
-Standard types:
+### Standard types
 * __str__
 * __int__
 * __real__
 * __bool__
+                          
 
+## Custom type definition 
+```ruby 
+class MyScope < Hexa::Scope
+  Re = type Regexp 
+end
+```
 
-## Constants 
+## Type casting 
+```ruby 
+class MyScope < Hexa::Scope
+  Re = type Regexp
+  
+  cast from: String, to: Re, { |str| Regexp.new(str)} #  cast from: ->(x) { x.is_a?(String) } 
+  
+  Arr = type Array # creates a scalar type 
+  
+  case from: Enumberable, to: Arr # from everyting which 
+  
+  Hsh = type Hash # creates a scalar type 
+  
+  case from: ->(x) { |x| x.is_a?(Enumerable) && x.respond_to?(:[]) }, to: Hsh # from everyting which  
+end
+```
+
+## Constants
 ```ruby 
 class MyScope < Hexa::Scope
   MyName = const str "Dima" 
@@ -79,12 +97,33 @@ class MyScope < Hexa::Scope
 end
 ```
 
-
 ### Signatures
 ... TBD ...
 
+### Methods
+* methods are just a functions where the target object is first in the tuple
 
-## Constraints
+```ruby 
+class TestScope < Hexa::Scope 
+  FirstName = str[:first_name] & min_len(2)
+  LastName = str[:last_name] & min_len(2)
+  Email = str[:email]
+  
+  User = FirstName * LastName * Email.list[:emails] 
+     
+  fn :full_name, User >> str { |u| |u| "#{u.first_name.upcase #{u.last_name.upcase}" }
+  
+  fn :to_s, User >> str { |u| "#{u.full_name} #{u.email}" } 
+end 
+
+### Definition options 
+* Block 
+* Collable 
+* method 
+* class_method 
+```
+
+## Constraints(aka Invariants)
 ```ruby 
 class MyScope < Hexa::Scope
   Re = type Regexp 
@@ -92,7 +131,6 @@ class MyScope < Hexa::Scope
   
   Email = str & pattern[/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/]
 end
-```
 
 ## Key-Value pairs 
 ```ruby 
@@ -155,21 +193,6 @@ end
 
 
 
-## Methods 
-* methods can't change the object. just read only 
-
-```ruby 
-class TestScope < Hexa::Scope 
-  FirstName = str[:first_name] & min_len(2)
-  LastName = str[:last_name] & min_len(2)
-  Email = str[:email]
-  
-  User = FirstName * LastName * Email.list[:emails] 
-     
-  fn :full_name, User >> str { |u| |u| "#{u.first_name.upcase #{u.last_name.upcase}" }
-  
-  fn :to_s, User >> str { |u| "#{u.full_name} #{u.email}" } 
-end 
 ```
 
 ## Types Composition
@@ -221,62 +244,47 @@ end
 
 ## Annotations 
 * Annotation can be added for every type like
-```ruby
-class UserAccount < Hexa::Domain 
-  User = type record name: str, email: str
-  
-  doc User, "Hello World"
-  doc User, :name, "Name"
-  doc User, name: "Name", email: "Email" 
-  
-  doc User do 
-    doc :name, "Hello"
-    doc :world, "World"
-  end
-  
-  Call = pipeline str >> str do
-    pipe :one
-    pipe :two
-    pipe :three
-  end
-  
-  doc :call do 
-    doc "One"
-    doc "Two"
-    doc "Three"
-  end
-end
+```yaml
+scope:
+  desc:
+    # Accounting Context
+    ## Entities 
+    <%= key :user %>
+    
+    ## Commands 
+    <%= key :creat_user %>
+  keys:    
+    user:
+      desc: > 
+        ### User 
+        
+        This text is in markdown format 
+
+        <%= all_keys %>
+      keys:
+        first_name: User first name 
+        last_name: User last name 
+        email: User Email
+    create_user:
+      desc: >
+        ### Create User Command
+        <%= all_keys %>
 
 ```
-* It's better to keep annotations as a separate moule 
 ```ruby
 
 class UserAccount < Hexa::Domain
-  User = type record name: str, email: str
-
+  User =  str[:name] * str[:email]
+  
+  extend Implementations
+  
   Call = pipeline str >> str do
     pipe :one
     pipe :two
     pipe :three
   end
-
-  include Implementations
-  include Annotations  
-  
-  seal
 end
 
-
-class UserAccount < Hexa::Domain 
-  # module Annotations
-  #   extend Hexa::Patial 
-  #  
-  #   included do
-  #     doc :user, "Hello World", name: "Name", email: "Email"
-  #     doc :default, :items, ["One", "Two", "Three"]
-  #   end
-  # end
-end
 
 class UserAccount < Hexa::Domain
   module Implementations
@@ -332,39 +340,47 @@ end
 ### Pipelines inside pipelines 
 ```ruby
 class MyScope < Hexa::Scope
-  input = init str * str 
-  
-  Forward = pipeline str >> str do |inp|
-    pipe inp * input >> str, :one # pipe method will create a function with implementation method(:one)
-    pipe :two  #input and output type will be inferred automatically  
-    pipe :three
-    pipe :four  
+  input = init str
+
+  # & operator
+  export_default pipe :forward, str >> str do |inp|
+    apply :one, inp * input >> str # pipe method will create a function with implementation method(:one)
+    apply :two, str >> str #input and output type will be inferred automatically  
+    apply :three, str >> str
+    apply :four, str >> str  
+  end
+
+  # * operator 
+  export pipe, :backward, str >> str do |inp|
+    apply :four, inp * input >> str
+    apply :three, str >> str
+    apply :two, str >> str
+    apply :one, str >> str
   end
   
-  Backward = pipeline str >> str do |inp|
-    pipe inp * input >> str, :four
-    pipe :three
-    pipe :two
-    pipe :one
+  # + operator 
+  export stack :many, str >> str * str * str * str do |inp|
+    apply :four, inp >> str
+    apply :three, inp >> str
+    apply :two, inp >> str
+    apply :one, inp >> str
   end
  
-  def one(str, inp)
+  def self.one(str, inp)
     str + ":f1[#{inp.join(',')}]"
   end
   
-  def two(str, inp)
+  def self.two(str, inp)
     str + ":f2[#{inp.join(',')}]"
   end
 
-  def three(str, inp)
+  def self.three(str, inp)
     str + ":f3[#{inp.join(',')}]"  
   end
   
-  def four(str, inp)
+  def self.four(str, inp)
     str + ":f4[#{inp.join(',')}]"
   end
-  
-  seal Forward# at the moment of export we will check that all implementations are in place 
 end
 
 class MyScopeAlternativeSyntax < Hexa::Scope
@@ -375,9 +391,11 @@ class MyScopeAlternativeSyntax < Hexa::Scope
   three = fn str * input >> str, :three
   four = fn str * input >> str, :four
 
-  Forward = one & two & three & four
+  export_default fn :forward, one & two & three & four
 
-  Backward = one + two + three + four
+  export fn :backward, one * two * three * four
+
+  export fn :many, one + two + three + four
 
   def one(str, inp)
     str + ":f1[#{inp.join(',')}]"
@@ -394,10 +412,6 @@ class MyScopeAlternativeSyntax < Hexa::Scope
   def four(str, inp)
     str + ":f4[#{inp.join(',')}]"
   end
-
-  
-
-  seal Forward  # at the moment of export we will check that all implementations are in place 
 end
 
 test = MyScope.new('aaa', 'bbb')
@@ -417,143 +431,119 @@ test.to_proc(:backward, false)
 ```
 
 
-MyPackage::HelloWorld.call
-
-
-### All Of, Some Of, One Of, Any Of  
-Result a Tuple (for tuple input) or a Record (for record input)
-
-```ruby
-  pipeline str >> str do |str|
-    split do
-      pipe str >> maybe(Event1), :native_impl_1 # here can be eiter function of func type + native implementation 
-      pipe str >> maybe(Event2), :native_impl_2
-      pipe str >> maybe(Event3), :native_impl_3
-      pipe str >> maybe(Event4), :native_impl_4
-    end
-    # result is a tuple of monads
-
-    join  # options: all_or_error, all_or_error
-  end 
-```
 
 ```ruby
 class UserAccount < Hexa::Domain 
-  user_data = type record first_name: str, last_name: str
+  user_data = str[:first_name] * str[:last_name]
 
-  CreateUser = type command + user_data # + means that command will concatenate all attributes from the record 
+  UserId = str[:id] 
   
-  UserId = type str 
-  
-  UserAggregate = type aggregate UserId # aggegate takes an id type as a parameter
-      
-  User = type entity(UserAggregate) + user_data # if entity takes an aggreagte as a key, then it becomes an aggregate 
-                                                # root entity. each command has to have at least on aggregate root   
-  Account = type entity UserAggregate, balance: int
-  Order = type entity UserAggregate, date: date, amount: int
+  UserAggregate = aggregate UserId # aggegate takes an id type as a parameter
 
-  AccWasCreaded = type event.wip
-  AccWasFunded = type event.wip
-  AccWasWithdrawn = type event.wip
+  CreateUser = command :create_user, UserAggregate, user_data
+  User = entity :user, UserAggregate, UserId.tuple + user_data    # root entity. each command has to have at least on aggregate root   
+  Account = entity :account, UserAggregate, int[:balance].tuple 
+  Order = entity :account, UserAggregate, date[:date] * int[:amount]
+  NewUserMock = entity :new_user, UserAggregate, UserId.tuple
+
+  AccWasCreaded = event :acc_created, UserAggregate, tuple.wip
+  AccWasFunded = event :acc_funded, UserAggregate, tuple.wip
+  AccWasWithdrawn = event :acc_withdrawn, UserAggregate, tuple.wip
    
-  AccountEvents = type AccWasCreaded | AccWasFunded | AccWasWithdrawn
+  AccountEvents = AccWasCreaded | AccWasFunded | AccWasWithdrawn
    
-  Ports = init record get_user: UserId >> io(User),
-                      put_user: User >> io,
-                      get_account_events: UserId >> io(AccountEvents.list),
-                      put_account_events: AccountEvents >> io,
-                      get_order: UserId >> io(Order),
-                      put_order: Order >> io,
-                      user_id_provider: Nothing >> io(str)
+  Ports = init tuple get_user: UserId >> io(User),
+                     get_new_user_mock: CreateUser >> io(NewUserMock),
+                     put_user: User >> io,
+                     get_account_events: UserId >> io(AccountEvents.list),
+                     put_account_events: AccountEvents >> io,
+                     get_order: UserId >> io(Order),
+                     put_order: Order >> io
    
   repository Ports[:get_user], Ports[:put_user], Ports[:get_account_events], Ports[:put_account_events],
              Ports[:get_order], Ports[:put_order] # this will generate a func with a native implementation aka proc 
 
-  UserEvents = type Event1 | Event2 | Event3 | Event4
+  UserEvents = Event1 | Event2 | Event3 | Event4
 
   # decider builder 
-  decide CreateUser * Ports[:user_id_provider] >> result(UserEvents) do |command, id_provider| 
-    # we are inside pipeline. after params substitution the 1-st step of th pipeline always starts with Nothing.
-    pipe id_provider >> str, &:call
-    split do
-      pipe command * id >> maybe(Event1), :native_impl_1
-      pipe command * id >> maybe(Event2), :native_impl_2 
-      pipe command * id >> maybe(Event3), :native_impl_3
-      pipe command * id >> maybe(Event4), :native_impl_4
+  decide CreateUser, NewUserMock >> UserEvents.list, pipe do |cmd, user_mock| 
+    stack do
+      apply :event_1, cmd[:command] * user_mock[:id] >> maybe(Event1)
+      apply :event_2, cmd[:command] * user_mock[:id] >> maybe(Event2)
+      apply :event_3, cmd[:command] * user_mock[:id] >> maybe(Event3)
+      apply :event_3, cmd[:command] * user_mock[:id] >> maybe(Event4)
     end
-    join # convert tuple to a list?
+      
+    apply :to_list
+    apply :compact # removes all maybe 
   end
- 
+
+  # alternative implementation 
+  decide CreateUser, NewUserMock >> UserEvents.list do |cmd, user_mock|
+    id = user_mock[:id]
+    [event_1(cmd:, id:), event_2(cmd:, id:), event_3(cmd:, id:), event_4(cmd:, id:)].compact 
+  end
+  
+  def self.next_id(command)
+    UUID.generate  
+  end
+  
+  def self.event_1(command:, id:)
+    
+  end
+
+  def self.event_2(command:, id:)
+
+  end
+
+  def self.event_3(command:, id:)
+
+  end
+
+  def self.event_4(command, id)
+
+  end
+
   evolve Account * AccBalanceWasUpdated >> Account do |account, event|
     pipe account * event >> Account do |account, event|
       account.mutate { |x| x.balance = event.balance }
     end
   end
   
-  seal # export here is overloaded. it will  
 end
 ```
-### Pipeline blocks
-* Split
-* Join 
+### Composition keywords 
+* pipe (&)
+* compose (*)
+* stack (+)
+* eather 
+* repeat 
+* apply (func name and/or implementation)
 
-### Any Of 
-Result is a Union  (for tuple input) or a Choice (for record input)
-If all have the same type then output will be this type without union
-
-### Join
-
-### Repeater - Until
-### Repeater - While
-
-
-## ConnectionExit
-### Bind
-### Map
-### Tee
-### Buffering 
-### Generators
-Repeater + Buffering?
-
-
-## Error Handling 
-### Panics vs Failures 
-### Deferred 
-### Compensate
-Any Of 
-  - Branch : x -> Maybe[y]
-  - Compensate : x -> Success[y] (returns success only)
 
 
 
 ```ruby
 class Accounting < Hexa::Domain 
-  Cents = type int.wip 
+  Cents = int.wip 
   
-  MainClaim = type record.wip
+  MainClaim = tuple[:main_claim].wip
   
-  SideClaim = type record.wip 
+  SideClaim = tuple[:side_claim].wip 
   
-  CreditorBounce = type record.wip
+  CreditorBounce = tuple[:creditor_bounce].wip
   
-  CreditorPayment = type record.wip
+  CreditorPayment = tuple[:creditor_payment].wip
   
-  CreditorClaim = type record main_claim: MainClaim,  side_claims: SideClaim.list, 
-                              bounces: CreditorBounce.list, payments: CreditorPayment.list
+  CreditorClaim = MainClaim * SideClaim.list * CreditorBounce.list * CreditorPayment.list # plural key will be automatically inflected
   
-  CollectionFee = type record.wip
+  CollectionFee = tuple[:collection_fee].wip
 
-  CollectionPayment = type record.wip
+  CollectionPayment = tuple[:collection_payment].wip
 
-  CaseFile = type record claims: CreditorClaim.list, fees: CollectionFee.list, payments: CollectionPayment.list
+  CaseFile = CreditorClaim.list * CollectionFee.list * CollectionPayment.list
 end
 ```
-
-
-* Type keyword seals the type
-* Type keyword just copies everithin which the variable has at the moment to a new type variable
-* Only sealed type can be used in function, choices, tupes, lists, maps, etc  
-* Type which defines constrains is a prototype. Special keyword for a prototype?
 
 
 ### Example!
@@ -562,26 +552,25 @@ Putting external parameters to validators
 
 ```ruby 
 class InstallmetnPlans < Hexa::Domain
-  currency = type enum(:usd, :eur, :chf)
-  input = init record supported_currencies: currency.list, current_date: date 
+  AllCurrencies = enum :usd, :eur, :chf
+  input = init AllCurrencies.list[:supported_currencies], date[:current_date] 
   
-  latest_date = fn input >> date { |x| x[:current_date] + 1.day }
+  latest_date = fn input[:current_date] >> date { |x| x + 1.day }
   
-  CaseFileId = type str.wip
+  CaseFileId = str[:case_file_id].wip
   
-  Cents = type int gt: 100
-  Currency = type currency.constraint(in: input[:supported_currencies]) # constraint on enum 
-  Amount = type record cents: Cents, currency: Currency
+  Cents = int[:cents] & gt[0]
   
-  InstallmentPlanData = type record case_file_id: CaseFileId,  # validatrors can take constas/constructors and params 
-                                    amount: Amount,
-                                    start_date: date(gt: input[:current_date], lte: latest_date) 
+  Currency = AllCurrencies[:currency] & include[input[:supported_currencies]] # constraint on enum 
+  Amount = (Cents * Currency).key(:amount)
   
-  InstallmentPlan = type entity amount: Amount, date: Daye  
+  InstallmentPlanData = CaseFileId * Amount * (date[:start_date] & gtd[input[:current_date]])
+  
+  InstallmentPlan = Amount * date[:date]  
 
-  CreateInstallmentPlan = type command 
+  CreateInstallmentPlan = command :create_installment_plan, CaseFileId.tuple + InstallmentPlan 
   
-  InstallmetnPlanWasCreated = event.wip
+  InstallmetnPlanWasCreated = event[:installment_plan_was_created].wip
   
   factory input >> InstallmentPlan 
   
