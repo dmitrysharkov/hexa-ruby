@@ -14,6 +14,8 @@ GEM
     language_server-protocol (3.17.0.3)
     method_source (1.1.0)
     minitest (5.25.4)
+    minitest-skip (0.0.3)
+      minitest (~> 5.0)
     parallel (1.26.3)
     parser (3.3.7.0)
       ast (~> 2.4.1)
@@ -57,6 +59,7 @@ DEPENDENCIES
   byebug (~> 11.1)
   hexa-ruby!
   minitest (~> 5.25)
+  minitest-skip (~> 0.0.3)
   pry-byebug (~> 3.10)
   rake (~> 13.2)
   rubocop (~> 1.70)

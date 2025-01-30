@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'minitest/autorun'
+require 'minitest/skip_dsl'
 require 'hexa'
 require 'pry-byebug'
 
@@ -41,9 +42,5 @@ class TestPipeline < Hexa::Pipes::Seq
       [nil, 'Access denied']
     end
   end
-end
-
-class TestType < Hexa::Type
-
 end
 

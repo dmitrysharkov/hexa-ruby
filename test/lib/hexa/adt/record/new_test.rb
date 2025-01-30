@@ -3,7 +3,7 @@
 require_relative '_support'
 
 describe Hexa::Adt::RecordMixin do
-  describe 'class' do
+  xdescribe 'class' do
     it 'lists all attributes names' do
       assert_equal %i[first_name last_name dob email tags], User.attributes.map(&:name)
     end

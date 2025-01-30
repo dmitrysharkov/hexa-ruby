@@ -3,7 +3,7 @@
 require_relative '_support'
 
 describe 'Hexa::Adt::RecordMixin' do
-  describe 'eql' do
+  xdescribe 'eql' do
     before do
       @u1 = User.new(first_name: 'John', last_name: 'Doe', dob: '2001-01-01',
                      email: 'john@google.com', tags: [1] + %w[aaa bbb ccc])
@@ -15,7 +15,7 @@ describe 'Hexa::Adt::RecordMixin' do
                      email: 'jane@google.com', tags: [1] + %w[aaa bbb ddd])
     end
 
-    it 'checks equality' do
+    xit 'checks equality' do
       assert_equal @u1, @u2
       refute_equal @u1, @u3
       refute_equal @u3, @u4

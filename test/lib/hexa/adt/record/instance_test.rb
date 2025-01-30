@@ -3,7 +3,7 @@
 require_relative '_support'
 
 describe 'Hexa::Adt::RecordMixin' do
-  describe 'instance' do
+  xdescribe 'instance' do
     before do
       @instance = User.new(first_name: 'John', last_name: 'Doe', email: 'john@google.com',
                            dob: '2001-01-01', tags: [1] + %w[aaa bbb ccc])

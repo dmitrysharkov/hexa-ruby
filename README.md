@@ -10,17 +10,31 @@ Reading List:
 ## Types
 ```mermaid
 classDiagram
-      Type <|-- Nothing 
-      Type <|-- Signature
-      Type <|-- Structural
-      Structural <|-- Record
-      Structural <|-- Choice 
-      Structural <|-- Tuple
-      Structural <|-- Union
-      Structural <|-- List
-      Structural <|-- Map
-      Type <|-- Singular
-      Singular <|-- Enum
+      Type <|-- NoneType 
+      Type <|-- SomeType
+      SomeType <|-- NativeType
+      SomeType <|-- ManagedType
+      NativeType <|-- NativeValue 
+      NativeType <|-- NativeInterface
+      NativeType <|-- NativeSignature
+      ManagedType <|-- Value
+      ManagedType <|-- Interface
+      ManagedType <|-- Signature  
+      NativeValue <|-- Str
+      NativeValue <|-- Int
+      NativeValue <|-- Real
+      NativeValue <|-- Bool
+      NativeValue <|-- Date
+      NativeInterface <|-- Any
+      Value <|-- Scalar
+      Value <|-- Vector 
+      Value <|-- PseudoValue       
+      Scalar <|-- Enum
+      Vector <|-- Tuple
+      Vector <|-- List
+      Vector <|-- Map
+      Vector <|-- Choice
+      PseudoValue <-- TypeName
 ```
 
 
@@ -31,42 +45,42 @@ classDiagram
 * __bool__
                           
 
-## Custom type definition 
+## Custom native types definition 
 ```ruby 
 class MyScope < Hexa::Scope
-  Re = type Regexp 
+  Re = native_value Regexp 
 end
 ```
 
 ## Type casting 
 ```ruby 
 class MyScope < Hexa::Scope
-  Re = type Regexp
+  Re = native Regexp
   
-  cast from: String, to: Re, { |str| Regexp.new(str)} #  cast from: ->(x) { x.is_a?(String) } 
+  cast str >> Re % :invalid!  { |str| Regexp.new(str) rescue :invlalid! }
   
-  Arr = type Array # creates a scalar type 
+  Arr = native Array # creates a scalar type 
   
-  case from: Enumberable, to: Arr # from everyting which 
+  cast native(Enumberable) >> Arr &:to_a 
   
-  Hsh = type Hash # creates a scalar type 
+  Hsh = native Hash # creates a scalar type 
   
-  case from: ->(x) { |x| x.is_a?(Enumerable) && x.respond_to?(:[]) }, to: Hsh # from everyting which  
+  case native(Enumberable) >> Hsh { |src| src.map { |k,v| [k,v] }.to_h }  
 end
 ```
 
 ## Constants
 ```ruby 
 class MyScope < Hexa::Scope
-  MyName = const str "Dima" 
+  MyName = str.const("Dima") 
 end
 ```
 
 ## Maybe 
 ```ruby 
 class MyScope < Hexa::Scope
-  Re = type Regexp 
-  pattern = fn :pattern, Re * str >> bool { |re, s| s ~= re }
+  Re = native Regexp 
+  pattern = fn Re * str >> ok % :invalid!  { |re, s| s ~= re ? true : :invalid! }
   
   Email = str.maybe & pattern[/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/]
 end
@@ -86,14 +100,14 @@ class MyScope < Hexa::Scope
   Ranks = enum pawn: 'P', nkight: 'Kn', bishop: 'B', tour: 'T', qween: 'Q', king: 'K'
   Piece = Rank * Color
   
-  white_bishop = const Piece, ['B', 'W']
+  white_bishop = Piece.const('B', 'W')
 end
 ``` 
 
 ## Functions
 ```ruby 
 class MyScope < Hexa::Scope
-  add = fn int * int >> int { |x, y| x + y } 
+  add = fn :add, int * int >> int { |x, y| x + y } 
 end
 ```
 
@@ -105,15 +119,15 @@ end
 
 ```ruby 
 class TestScope < Hexa::Scope 
-  FirstName = str[:first_name] & min_len(2)
-  LastName = str[:last_name] & min_len(2)
-  Email = str[:email]
+  FirstName = str & min_len[2]
+  LastName = str & min_len[2]
+  Email = str
   
-  User = FirstName * LastName * Email.list[:emails] 
+  User = FirstName * LastName * Email.list 
      
-  fn :full_name, User >> str { |u| |u| "#{u.first_name.upcase #{u.last_name.upcase}" }
+  fn :full_name, User >> str { |u| "#{u.first_name.upcase} #{u.last_name.upcase}" }
   
-  fn :to_s, User >> str { |u| "#{u.full_name} #{u.email}" } 
+  fn to_s: User >> str { |u| "#{u.full_name} #{u.email}" }  # which style is better? 
 end 
 
 ### Definition options 
@@ -127,7 +141,7 @@ end
 ```ruby 
 class MyScope < Hexa::Scope
   Re = type Regexp 
-  pattern = fn :pattern, Re * str >> bool { |re, s| s ~= re }
+  pattern = fn :pattern, Re * str >> ok % :invalid! { |re, s| s ~= re ? true : :invalid! }
   
   Email = str & pattern[/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/]
 end
@@ -143,8 +157,8 @@ or better
 
 ```ruby 
 class MyScope < Hexa::Scope
-  FirstName = str[:first_name] & min_len(2)
-  LastName = str[:last_name] & min_len(2)
+  FirstName = str[:first_name] & min_len[2]
+  LastName = str[:last_name] & min_len[2]
   User = FirstName * LastName
 end
 ```
@@ -153,8 +167,8 @@ end
 
 ```ruby 
 class MyScope < Hexa::Scope
-  FirstName = str[:first_name] & min_len(2)
-  LastName = str[:last_name] & min_len(2)
+  FirstName = str[:first_name] & min_len[2]
+  LastName = str[:last_name] & min_len[2]
   Person = FirstName * LastName
   
   UserOrAdmin = Person[:user] | Person[:admin]
@@ -165,9 +179,9 @@ or
 
 ```ruby 
 class MyScope < Hexa::Scope
-  FirstName = str[:first_name] & min_len(2)
-  LastName = str[:last_name] & min_len(2)
-  Role[:role] = (const str 'admin') | (const str 'user')
+  FirstName = str[:first_name] & min_len[2]
+  LastName = str[:last_name] & min_len[2]
+  Role[:role] = str.const('admin') | str.const('user')
   
   UserOrAdmin = FirstName * LastName * Role 
 end
@@ -182,7 +196,7 @@ class MyScope < Hexa::Scope
   LastName = str[:last_name] & min_len(2)
   Email = str[:email]
   
-  User = FirstName * LastName * Email.list[:emails] 
+  User = FirstName * LastName * Email.list # by default it will have a name :emails  
 end
 ```
 
@@ -192,8 +206,6 @@ end
 
 
 
-
-```
 
 ## Types Composition
 ```ruby 
@@ -212,18 +224,19 @@ end
 ## Scope arguments 
 ```ruby 
 class TestScope < Hexa::Scope   
-  args = init int[:max_amount].tuple 
+  max_amount = init int[:max_amount] 
+  min_amount = init int[:min_amount]
 end 
 ```
 
 ## Curring function 
 ```ruby 
 class TestScope < Hexa::Scope   
-  gt = fn int * int >> bool { |base, x| x > base } 
+  gt = fn int * int >> ok % err(:less, int) { |base, x| x > base ? true : [:less, base] } 
   gt5 = gt[5]
   gt10 = gt[10]
   
-  seven = const int 7
+  seven = int.const(7)
   gt_seven = gt[seven]
 end 
 ```
@@ -231,7 +244,7 @@ end
 ## Scope constant expressions 
 ```ruby 
 class TestScope < Hexa::Scope 
-  args = init int[:max_amount].tuple  
+  args = init int[:max_amount]  
   gt = fn int * int >> bool { |base, x| x > base } 
   
   gt_max_amount = gt[args[:max_amount]]
@@ -240,7 +253,18 @@ class TestScope < Hexa::Scope
 end 
 ```
 
-
+## Scope State 
+```ruby 
+class TestScope < Hexa::Scope 
+  counter_init = init int[:counter]
+  
+  counter = state counter_init  
+  
+  export fn :increment, counter >> int * counter do |counter|
+    [counter + 1, counter + 1]
+  end
+end 
+```
 
 ## Annotations 
 * Annotation can be added for every type like
@@ -278,13 +302,13 @@ class UserAccount < Hexa::Domain
   
   extend Implementations
   
-  Call = pipeline str >> str do
-    pipe :one
-    pipe :two
-    pipe :three
+  export_default pipe str >> str do
+    apply :one
+    apply :two
+    apply :three
   end
 end
-
+                        
 
 class UserAccount < Hexa::Domain
   module Implementations
@@ -343,23 +367,23 @@ class MyScope < Hexa::Scope
   input = init str
 
   # & operator
-  export_default pipe :forward, str >> str do |inp|
+  export_default pipe :forward, str >> str  do |inp|
     apply :one, inp * input >> str # pipe method will create a function with implementation method(:one)
-    apply :two, str >> str #input and output type will be inferred automatically  
-    apply :three, str >> str
-    apply :four, str >> str  
+    apply :two #input and output type will be inferred automatically  
+    apply :three
+    apply :four  
   end
 
   # * operator 
-  export pipe, :backward, str >> str do |inp|
+  export pipe :backward, str >> str do |inp|
     apply :four, inp * input >> str
-    apply :three, str >> str
-    apply :two, str >> str
-    apply :one, str >> str
+    apply :three
+    apply :two
+    apply :one
   end
   
   # + operator 
-  export stack :many, str >> str * str * str * str do |inp|
+  export all_of :many, str >> auto do |inp|
     apply :four, inp >> str
     apply :three, inp >> str
     apply :two, inp >> str
@@ -386,30 +410,30 @@ end
 class MyScopeAlternativeSyntax < Hexa::Scope
   input = init str * str
   
-  one = fn str * input >> str, :one
-  two = fn str * input >> str, :two
-  three = fn str * input >> str, :three
-  four = fn str * input >> str, :four
+  one = fn :one, str * input >> str
+  two = fn :two, str * input >> str
+  three = fn :three, str * input >> str
+  four = fn :four, str * input >> str
 
-  export_default fn :forward, one & two & three & four
+  export_default :forward, one & two & three & four
 
-  export fn :backward, one * two * three * four
+  export :backward, one * two * three * four
 
-  export fn :many, one + two + three + four
+  export :many, one + two + three + four
 
-  def one(str, inp)
+  def self.one(str, inp)
     str + ":f1[#{inp.join(',')}]"
   end
 
-  def two(str, inp)
+  def self.two(str, inp)
     str + ":f2[#{inp.join(',')}]"
   end
 
-  def three(str, inp)
+  def self.three(str, inp)
     str + ":f3[#{inp.join(',')}]"
   end
 
-  def four(str, inp)
+  def self.four(str, inp)
     str + ":f4[#{inp.join(',')}]"
   end
 end
@@ -430,86 +454,36 @@ test.to_proc(:backward, false)
 
 ```
 
-
-
 ```ruby
 class UserAccount < Hexa::Domain 
-  user_data = str[:first_name] * str[:last_name]
+  aggregate str[:user_id] do |id|
+    user_data = str[:first_name] * str[:last_name]
 
-  UserId = str[:id] 
-  
-  UserAggregate = aggregate UserId # aggegate takes an id type as a parameter
+    create_command create_user: user_data
 
-  CreateUser = command :create_user, UserAggregate, user_data
-  User = entity :user, UserAggregate, UserId.tuple + user_data    # root entity. each command has to have at least on aggregate root   
-  Account = entity :account, UserAggregate, int[:balance].tuple 
-  Order = entity :account, UserAggregate, date[:date] * int[:amount]
-  NewUserMock = entity :new_user, UserAggregate, UserId.tuple
-
-  AccWasCreaded = event :acc_created, UserAggregate, tuple.wip
-  AccWasFunded = event :acc_funded, UserAggregate, tuple.wip
-  AccWasWithdrawn = event :acc_withdrawn, UserAggregate, tuple.wip
-   
-  AccountEvents = AccWasCreaded | AccWasFunded | AccWasWithdrawn
-   
-  Ports = init tuple get_user: UserId >> io(User),
-                     get_new_user_mock: CreateUser >> io(NewUserMock),
-                     put_user: User >> io,
-                     get_account_events: UserId >> io(AccountEvents.list),
-                     put_account_events: AccountEvents >> io,
-                     get_order: UserId >> io(Order),
-                     put_order: Order >> io
-   
-  repository Ports[:get_user], Ports[:put_user], Ports[:get_account_events], Ports[:put_account_events],
-             Ports[:get_order], Ports[:put_order] # this will generate a func with a native implementation aka proc 
-
-  UserEvents = Event1 | Event2 | Event3 | Event4
-
-  # decider builder 
-  decide CreateUser, NewUserMock >> UserEvents.list, pipe do |cmd, user_mock| 
-    stack do
-      apply :event_1, cmd[:command] * user_mock[:id] >> maybe(Event1)
-      apply :event_2, cmd[:command] * user_mock[:id] >> maybe(Event2)
-      apply :event_3, cmd[:command] * user_mock[:id] >> maybe(Event3)
-      apply :event_3, cmd[:command] * user_mock[:id] >> maybe(Event4)
-    end
-      
-    apply :to_list
-    apply :compact # removes all maybe 
-  end
-
-  # alternative implementation 
-  decide CreateUser, NewUserMock >> UserEvents.list do |cmd, user_mock|
-    id = user_mock[:id]
-    [event_1(cmd:, id:), event_2(cmd:, id:), event_3(cmd:, id:), event_4(cmd:, id:)].compact 
-  end
-  
-  def self.next_id(command)
-    UUID.generate  
-  end
-  
-  def self.event_1(command:, id:)
+    entity order: date[:date] * int[:amount]
     
-  end
-
-  def self.event_2(command:, id:)
-
-  end
-
-  def self.event_3(command:, id:)
-
-  end
-
-  def self.event_4(command, id)
-
-  end
-
-  evolve Account * AccBalanceWasUpdated >> Account do |account, event|
-    pipe account * event >> Account do |account, event|
-      account.mutate { |x| x.balance = event.balance }
+    root user: user_data + entity[:order].list,  
+         account: int[:balance].tuple
+    
+    event account_was_created: int[:balance].tuple, 
+          account_was_funded: date[:date] * int[:amount],
+          user_was_created: user_data
+    
+    decide :create_user, id, ev: %i[user_was_created account_was_created] do |cmd, new_id|
+      [
+        [:event, :user_was_created, { user_id: new_id, **cmd[:params] }], 
+        [:event, :account_was_created, { user_id: new_id, balance: 0 }]
+      ]  
+    end
+    
+    evolve :account, :account_was_funded do |account, event|
+      account.to_h.merge(account[:amount] + event[:params][:amount])
+      
+      # alternative with patch syntax
+      account.patch(amount: account[:amount] + event[:params][:amount])
     end
   end
-  
 end
 ```
 ### Composition keywords 
@@ -520,26 +494,23 @@ end
 * repeat 
 * apply (func name and/or implementation)
 
-
-
-
 ```ruby
 class Accounting < Hexa::Domain 
-  Cents = int.wip 
+  Cents = int[:cents].wip 
   
-  MainClaim = tuple[:main_claim].wip
+  MainClaim = entity.wip  
   
-  SideClaim = tuple[:side_claim].wip 
+  SideClaim = entity.wip 
   
-  CreditorBounce = tuple[:creditor_bounce].wip
+  CreditorBounce = entity.wip
   
-  CreditorPayment = tuple[:creditor_payment].wip
+  CreditorPayment = entity.wip
   
   CreditorClaim = MainClaim * SideClaim.list * CreditorBounce.list * CreditorPayment.list # plural key will be automatically inflected
   
-  CollectionFee = tuple[:collection_fee].wip
+  CollectionFee = entity.wip
 
-  CollectionPayment = tuple[:collection_payment].wip
+  CollectionPayment = entity.wip
 
   CaseFile = CreditorClaim.list * CollectionFee.list * CollectionPayment.list
 end
@@ -553,7 +524,7 @@ Putting external parameters to validators
 ```ruby 
 class InstallmetnPlans < Hexa::Domain
   AllCurrencies = enum :usd, :eur, :chf
-  input = init AllCurrencies.list[:supported_currencies], date[:current_date] 
+  input = init AllCurrencies.list[:supported_currencies] * date[:current_date] 
   
   latest_date = fn input[:current_date] >> date { |x| x + 1.day }
   
@@ -602,6 +573,34 @@ ip_scope =  InstallmetnPlans.new(%w[usd eur], Date.today)
 ## Evolve
 ## React 
 ## Saga
+
+```ruby
+  repository Ports[:get_user], Ports[:put_user], Ports[:get_account_events], Ports[:put_account_events],
+             Ports[:get_order], Ports[:put_order] # this will generate a func with a native implementation aka proc 
+
+
+
+Ports = init tuple get_user: UserId >> io(User),
+                     get_new_user_mock: CreateUser >> io(NewUserMock),
+                     put_user: User >> io,
+                     get_account_events: UserId >> io(AccountEvents.list),
+                     put_account_events: AccountEvents >> io,
+                     get_order: UserId >> io(Order),
+                     put_order: Order >> io
+
+
+decide CreateUser * id >> UserEvents.list, pipe do |cmd, user_mock|
+  stack do
+    apply :event_1, cmd[:command] * user_mock[:id] >> maybe(Event1)
+    apply :event_2, cmd[:command] * user_mock[:id] >> maybe(Event2)
+    apply :event_3, cmd[:command] * user_mock[:id] >> maybe(Event3)
+    apply :event_3, cmd[:command] * user_mock[:id] >> maybe(Event4)
+  end
+
+  apply :to_list
+  apply :compact # removes all maybe 
+end
+```
 
 
 

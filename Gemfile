@@ -8,6 +8,7 @@ gem 'rake', '~> 13.2'
 
 group :test do
   gem 'minitest', '~> 5.25'
+  gem 'minitest-skip', '~> 0.0.3'
 end
 
 group :tools do
@@ -22,5 +23,7 @@ end
 
 
 gemspec
+
+
 
 
